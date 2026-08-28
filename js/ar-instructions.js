@@ -162,23 +162,7 @@
       }
     }, 3000);
 
-    // Kamera-Fehler abfangen
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-        .then(stream => {
-          stream.getTracks().forEach(track => track.stop());
-        })
-        .catch(err => {
-          console.warn('[AR] Kamera-Zugriff verweigert:', err);
-          const loading = document.getElementById('loading');
-          if (loading) {
-            loading.innerHTML = `
-              <p style="color: #ff6b6b;">⚠️ Kamera-Zugriff erforderlich</p>
-              <p class="small" style="margin-top: 0.5rem;">Bitte erlauben Sie den Kamera-Zugriff in Ihren Browsereinstellungen.</p>
-            `;
-          }
-        });
-    }
+    // Kamera-Fehler abfangen – AR.js macht das selbst, wir brauchen keinen eigenen Aufruf
   }
 
   // Globale Funktionen
