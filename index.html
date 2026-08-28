@@ -7,10 +7,10 @@
   <meta name="mobile-web-app-capable" content="yes">
   <title>Bohrmaschine – AR Anleitung</title>
   <link rel="stylesheet" href="css/style.css">
-  <!-- A-Frame als CDN (klein, lädt schnell) -->
+  <!-- A-Frame -->
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-  <!-- Lokale AR.js – vermeidet CDN-Blockaden auf Android 16 -->
-  <script src="lib/aframe-ar.js"></script>
+  <!-- AR.js – latest master (marker tracking) -->
+  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 </head>
 <body>
 
@@ -35,13 +35,13 @@
   <!-- AR-Szene mit Barcode-Markern -->
   <a-scene
     embedded
+    arjs="sourceType: webcam; sourceWidth: 640; sourceHeight: 480; displayWidth: 640; displayHeight: 480; cameraTexture: true; debugUIEnabled: true; detectionMode: monoAndColor; matrixCodeType: 3x3;"
     vr-mode-ui="enabled: false"
-    arjs="sourceType: webcam; cameraTexture: true; debugUIEnabled: false; detectionMode: barcode; matrixCodeType: 3x3;"
     renderer="logarithmicDepthBuffer: true; antialias: true; alpha: true"
   >
 
     <!-- ============ MARKER 1: EINSCHALTER (Barcode 0) ============ -->
-    <a-marker type="barcode" barcodeValue="0" id="marker-onoff">
+    <a-marker type="barcode" barcodeValue="0" id="marker-onoff" smooth="count:3">
       <a-entity position="0 0.15 0" scale="0.15 0.15 0.15">
         <a-plane
           src="images/onoff-instruction.svg"
@@ -76,7 +76,7 @@
     </a-marker>
 
     <!-- ============ MARKER 2: BOHRFUTTER (Barcode 1) ============ -->
-    <a-marker type="barcode" barcodeValue="1" id="marker-chuck">
+    <a-marker type="barcode" barcodeValue="1" id="marker-chuck" smooth="count:3">
       <a-entity position="0 0.15 0" scale="0.15 0.15 0.15">
         <a-plane
           src="images/chuck-instruction.svg"
@@ -111,7 +111,7 @@
     </a-marker>
 
     <!-- ============ MARKER 3: DREHZAHLREGELER (Barcode 2) ============ -->
-    <a-marker type="barcode" barcodeValue="2" id="marker-speed">
+    <a-marker type="barcode" barcodeValue="2" id="marker-speed" smooth="count:3">
       <a-entity position="0 0.15 0" scale="0.15 0.15 0.15">
         <a-plane
           src="images/speed-instruction.svg"
@@ -146,7 +146,7 @@
     </a-marker>
 
     <!-- ============ MARKER 4: SÄGEGUARD (Barcode 3) ============ -->
-    <a-marker type="barcode" barcodeValue="3" id="marker-guard">
+    <a-marker type="barcode" barcodeValue="3" id="marker-guard" smooth="count:3">
       <a-entity position="0 0.15 0" scale="0.15 0.15 0.15">
         <a-plane
           src="images/guard-instruction.svg"
