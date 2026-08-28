@@ -7,9 +7,10 @@
   <meta name="mobile-web-app-capable" content="yes">
   <title>Bohrmaschine – AR Anleitung</title>
   <link rel="stylesheet" href="css/style.css">
+  <!-- Three.js MUSS vor AR.js geladen werden -->
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@aframe/4.0.0/three.js/build/three-min.js"></script>
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@aframe/4.0.0/aframe/build/aframe-ar.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@aframe/4.0.0/three.js/build/three-jscmin.js"></script>
 </head>
 <body>
 
@@ -35,7 +36,7 @@
   <a-scene
     embedded
     vr-mode-ui="enabled: false"
-    arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false; detectionMode: barcode; matrixCodeType: 3x3;"
+    arjs="sourceType: webcam; cameraTexture: true; debugUIEnabled: false; detectionMode: barcode; matrixCodeType: 3x3;"
     renderer="logarithmicDepthBuffer: true; antialias: true; alpha: true"
   >
 
@@ -48,7 +49,7 @@
           width="0.4"
           height="0.25"
           position="0 0.05 0.001"
-          material="transparent: true; opacity: 0.95;"
+          material="transparent: true; opacity: 0.95; side: double;"
         ></a-plane>
         <a-box
           position="0 0.05 0"
@@ -85,7 +86,7 @@
           width="0.4"
           height="0.25"
           position="0 0.05 0.001"
-          material="transparent: true; opacity: 0.95;"
+          material="transparent: true; opacity: 0.95; side: double;"
         ></a-plane>
         <a-box
           position="0 0.05 0"
@@ -120,7 +121,7 @@
           width="0.4"
           height="0.25"
           position="0 0.05 0.001"
-          material="transparent: true; opacity: 0.95;"
+          material="transparent: true; opacity: 0.95; side: double;"
         ></a-plane>
         <a-box
           position="0 0.05 0"
@@ -155,7 +156,7 @@
           width="0.4"
           height="0.25"
           position="0 0.05 0.001"
-          material="transparent: true; opacity: 0.95;"
+          material="transparent: true; opacity: 0.95; side: double;"
         ></a-plane>
         <a-box
           position="0 0.05 0"

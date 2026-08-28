@@ -88,5 +88,5 @@ if __name__ == '__main__':
     os.makedirs(qr_dir, exist_ok=True)
     
     # URL basierend auf GitHub Pages
-    url = 'https://juli.github.io/AR_js/'
+    url = 'https://carcoder123.github.io/AR_js_Borhmaschine/'
     generate_qr_code(url, os.path.join(qr_dir, 'qr-code.svg'))
