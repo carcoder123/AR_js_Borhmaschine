@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Bohrmaschine – AR Anleitung</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@aframe/4.0.0/aframe/build/aframe-ar.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@aframe/4.0.0/three.js/build/three-jscmin.js"></script>
+</head>
+<body>
+
+  <!-- Desktop-Hinweis -->
+  <div id="desktop-hinweis">
+    <h1>🔧 Bohrmaschine – AR Anleitung</h1>
+    <p>Scanne einen der Barcode-Marker auf der Bohrmaschine mit deinem Smartphone.</p>
+    <p class="small">Stelle sicher, dass du eine stabile Internetverbindung hast.</p>
+    <div id="qr-section">
+      <img src="qr/qr-code.png" alt="QR-Code" width="200"/>
+      <p>QR-Code: Seite auf Smartphone öffnen</p>
+    </div>
+  </div>
+
+  <!-- Ladebildschirm -->
+  <div id="loading">
+    <div class="spinner"></div>
+    <p>AR wird geladen…</p>
+    <p class="small">Kamera-Zugriff wird benötigt</p>
+  </div>
+
+  <!-- AR-Szene mit Barcode-Markern -->
+  <a-scene
+    embedded
+    vr-mode-ui="enabled: false"
+    arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false; detectionMode: barcode; matrixCodeType: 3x3;"
+    renderer="logarithmicDepthBuffer: true; antialias: true; alpha: true"
+  >
+
+    <!-- ============ MARKER 1: EINSCHALTER (Barcode 0) ============ -->
+    <a-marker type="barcode" barcodeValue="0" id="marker-onoff">
+      <a-entity position="0 0.15 0" scale="0.15 0.15 0.15">
+        <!-- Hintergrund -->
+        <a-plane
+          src="images/onoff-instruction.svg"
+          width="0.4"
+          height="0.25"
+          position="0 0.05 0.001"
+          material="transparent: true; opacity: 0.95;"
+        ></a-plane>
+        <a-box
+          position="0 0.05 0"
+          width="0.42"
+          height="0.27"
+          depth="0.002"
+          material="color: #1a1a2e; transparent: true; opacity: 0.85; side: double"
+        ></a-box>
+        <!-- Titel -->
+        <a-text
+          value="Einschalter"
+          align="center"
+          width="0.6"
+          color="#00ff88"
+          position="0 0.18 0.002"
+        ></a-text>
+        <!-- Anzeiger -->
+        <a-ring
+          radius-inner="0.005"
+          radius-outer="0.01"
+          segments-tubular="32"
+          color="#00ff88"
+          position="0 0.05 0.003"
+          animation="property: rotation; to: 0 360 0; loop: true; dur: 3000; easing: linear"
+        ></a-ring>
+      </a-entity>
+    </a-marker>
+
+    <!-- ============ MARKER 2: BOHRFUTTER (Barcode 1) ============ -->
+    <a-marker type="barcode" barcodeValue="1" id="marker-chuck">
+      <a-entity position="0 0.15 0" scale="0.15 0.15 0.15">
+        <a-plane
+          src="images/chuck-instruction.svg"
+          width="0.4"
+          height="0.25"
+          position="0 0.05 0.001"
+          material="transparent: true; opacity: 0.95;"
+        ></a-plane>
+        <a-box
+          position="0 0.05 0"
+          width="0.42"
+          height="0.27"
+          depth="0.002"
+          material="color: #1a1a2e; transparent: true; opacity: 0.85; side: double"
+        ></a-box>
+        <a-text
+          value="Bohrfutter"
+          align="center"
+          width="0.6"
+          color="#00ff88"
+          position="0 0.18 0.002"
+        ></a-text>
+        <a-ring
+          radius-inner="0.005"
+          radius-outer="0.01"
+          segments-tubular="32"
+          color="#00ff88"
+          position="0 0.05 0.003"
+          animation="property: rotation; to: 0 360 0; loop: true; dur: 3000; easing: linear"
+        ></a-ring>
+      </a-entity>
+    </a-marker>
+
+    <!-- ============ MARKER 3: DREHZAHLREGELER (Barcode 2) ============ -->
+    <a-marker type="barcode" barcodeValue="2" id="marker-speed">
+      <a-entity position="0 0.15 0" scale="0.15 0.15 0.15">
+        <a-plane
+          src="images/speed-instruction.svg"
+          width="0.4"
+          height="0.25"
+          position="0 0.05 0.001"
+          material="transparent: true; opacity: 0.95;"
+        ></a-plane>
+        <a-box
+          position="0 0.05 0"
+          width="0.42"
+          height="0.27"
+          depth="0.002"
+          material="color: #1a1a2e; transparent: true; opacity: 0.85; side: double"
+        ></a-box>
+        <a-text
+          value="Drehzahlregler"
+          align="center"
+          width="0.6"
+          color="#00ff88"
+          position="0 0.18 0.002"
+        ></a-text>
+        <a-ring
+          radius-inner="0.005"
+          radius-outer="0.01"
+          segments-tubular="32"
+          color="#00ff88"
+          position="0 0.05 0.003"
+          animation="property: rotation; to: 0 360 0; loop: true; dur: 3000; easing: linear"
+        ></a-ring>
+      </a-entity>
+    </a-marker>
+
+    <!-- ============ MARKER 4: SÄGEGUARD (Barcode 3) ============ -->
+    <a-marker type="barcode" barcodeValue="3" id="marker-guard">
+      <a-entity position="0 0.15 0" scale="0.15 0.15 0.15">
+        <a-plane
+          src="images/guard-instruction.svg"
+          width="0.4"
+          height="0.25"
+          position="0 0.05 0.001"
+          material="transparent: true; opacity: 0.95;"
+        ></a-plane>
+        <a-box
+          position="0 0.05 0"
+          width="0.42"
+          height="0.27"
+          depth="0.002"
+          material="color: #1a1a2e; transparent: true; opacity: 0.85; side: double"
+        ></a-box>
+        <a-text
+          value="Sägeguide"
+          align="center"
+          width="0.6"
+          color="#00ff88"
+          position="0 0.18 0.002"
+        ></a-text>
+        <a-ring
+          radius-inner="0.005"
+          radius-outer="0.01"
+          segments-tubular="32"
+          color="#00ff88"
+          position="0 0.05 0.003"
+          animation="property: rotation; to: 0 360 0; loop: true; dur: 3000; easing: linear"
+        ></a-ring>
+      </a-entity>
+    </a-marker>
+
+    <!-- Kamera -->
+    <a-entity camera></a-entity>
+
+  </a-scene>
+
+  <!-- Anweisungs-Overlay -->
+  <div id="ar-overlay" class="ar-instruction hidden"></div>
+
+  <script src="js/ar-instructions.js"></script>
+</body>
+</html>

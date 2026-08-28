@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#16213e"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#bg)" rx="16"/>
+  <rect x="20" y="20" width="760" height="460" fill="none" stroke="#00ff88" stroke-width="2" rx="12" opacity="0.3"/>
+  
+  <text x="400" y="70" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="#00ff88" text-anchor="middle">Bohrfutter</text>
+  
+  <g transform="translate(400, 260)">
+    <!-- Bohrfutter (drei-Zack) -->
+    <circle cx="0" cy="0" r="80" fill="none" stroke="#888" stroke-width="3"/>
+    <circle cx="0" cy="0" r="50" fill="#3a3a4a" stroke="#555" stroke-width="2"/>
+    <circle cx="0" cy="0" r="20" fill="#2a2a3a" stroke="#666" stroke-width="1"/>
+    <!-- Spannringer -->
+    <circle cx="0" cy="0" r="90" fill="none" stroke="#00ff88" stroke-width="4" stroke-dasharray="12,8"/>
+    <!-- Dreh-Pfeil -->
+    <path d="M 70 -70 A 100 100 0 0 1 -70 -70" fill="none" stroke="#00ff88" stroke-width="3"/>
+    <polygon points="-70,-70 -80,-55 -60,-65" fill="#00ff88"/>
+    <text x="0" y="-110" font-family="Arial" font-size="16" fill="#00ff88" text-anchor="middle">Gegen Uhrzeigersinn drehen</text>
+  </g>
+  
+  <g transform="translate(40, 430)">
+    <text x="0" y="0" font-family="Arial" font-size="16" fill="#ccc">1. Ring gegen Uhrzeigersinn drehen</text>
+    <text x="320" y="0" font-family="Arial" font-size="16" fill="#ccc">2. Bohrer einsetzen</text>
+    <text x="600" y="0" font-family="Arial" font-size="16" fill="#ccc">3. Festziehen</text>
+  </g>
+</svg>
