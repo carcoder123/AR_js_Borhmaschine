@@ -98,7 +98,7 @@ Die Barcode-Bilder in `marker/` können einfach ausgedruckt werden:
 python3 generate_assets.py marker qr
 ```
 
-Erzeugt Barcodes mit den Werten 0-511 für die 3x3 Matrix.
+Erzeugt Barcodes aus dem offiziellen [artoolkit-barcode-markers-collection](https://github.com/nicolocarpignoli/artoolkit-barcode-markers-collection) Repo (3x3_hamming_6_3 Format).
 
 ## Technische Details
 
