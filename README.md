@@ -18,11 +18,11 @@ AR_js/
 │   └── style.css           # Stylesheet
 ├── js/
 │   └── ar-instructions.js  # AR-Logik: Marker-Erkennung & Anzeigen
-├── images/                 # Anleitungsbilder (SVG)
-│   ├── onoff-instruction.svg   # Einschalter-Anleitung
-│   ├── chuck-instruction.svg   # Bohrfutter-Anleitung
-│   ├── speed-instruction.svg   # Drehzahlregler-Anleitung
-│   └── guard-instruction.svg   # Sägeguide-Anleitung
+├── images/                 # Anleitungsbilder (SVG als Quelle, PNG für die AR-Textur)
+│   ├── onoff-instruction.svg/.png   # Einschalter-Anleitung
+│   ├── chuck-instruction.svg/.png   # Bohrfutter-Anleitung
+│   ├── speed-instruction.svg/.png   # Drehzahlregler-Anleitung
+│   └── guard-instruction.svg/.png   # Sägeguide-Anleitung
 ├── marker/                 # Barcode-Bilder zum Ausdrucken (3x3 Hamming 6/3)
 │   ├── barcode_0.png       # Einschalter (Barcode 0)
 │   ├── barcode_1.png       # Bohrfutter (Barcode 1)
@@ -125,7 +125,14 @@ Erzeugt Barcodes aus dem offiziellen [artoolkit-barcode-markers-collection](http
 In `js/ar-instructions.js` die `instructions`-Objekte bearbeiten.
 
 ### Eigene Anleitungsbilder
-SVG-Dateien in `images/` ersetzen.
+SVG-Dateien in `images/` bearbeiten, danach PNG neu rendern (SVG-Texturen
+laufen auf manchen Smartphones nicht zuverlässig, im AR wird das PNG genutzt):
+```bash
+cd images
+for f in onoff chuck speed guard; do
+  rsvg-convert -w 1600 -h 1000 "$f-instruction.svg" -o "$f-instruction.png"
+done
+```
 
 ### Weitere Marker
 1. Neuen Barcode generieren: `python3 generate_assets.py marker qr`

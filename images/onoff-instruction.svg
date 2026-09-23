@@ -32,6 +32,6 @@
   <g transform="translate(40, 430)">
     <text x="0" y="0" font-family="Arial" font-size="16" fill="#ccc">1. roten Einschalter finden</text>
     <text x="280" y="0" font-family="Arial" font-size="16" fill="#ccc">2. einmal drücken = Ein</text>
-    <text x="560" y="0" font-family="Arial" font-size="16" fill="#ccc">3. gedrückt halten = Dauer</text>
+    <text x="545" y="0" font-family="Arial" font-size="16" fill="#ccc">3. halten = Dauerbetrieb</text>
   </g>
 </svg>
