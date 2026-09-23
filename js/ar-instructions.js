@@ -1,6 +1,13 @@
 /**
  * AR.js AR-Anleitung – Bohrmaschine
  * Verwaltet die Anzeige von AR-Anweisungen basierend auf Barcode-Markern
+ *
+ * Hinweise zur AR.js-Event-API (aframe-ar.js):
+ * - Bei Marker-Erkennung dispatcht AR.js auf window:
+ *     new CustomEvent('markerFound', { detail: markerControls })
+ *   mit markerControls.parameters.barcodeValue = Barcode-Nummer (0-511).
+ * - Zusätzlich emittiert das <a-marker>-Element selbst 'markerFound'/'markerLost'.
+ * - Beide Wege werden hier unterstützt (Fallback), wichtig ist die Barcode-Nummer.
  */
 
 (function() {
@@ -47,7 +54,6 @@
   };
 
   let currentInstruction = null;
-  let lastDetectedMarker = null;
   let markerHideTimeout = null;
 
   /**
@@ -81,7 +87,7 @@
   }
 
   /**
-   * Versteckt die aktuelle Anweisung nach Verlassen des Markers
+   * Versteckt die aktuelle Anweisung
    */
   function hideInstruction() {
     currentInstruction = null;
@@ -92,39 +98,38 @@
   }
 
   /**
-   * Event-Handler für marker-detected (AR.js 3.x)
+   * Marker erkannt – ggf. Ausblenden abbrechen, Anweisung zeigen
    */
-  function onMarkerDetected(event) {
-    // AR.js 3.x: event.detail enthält die Marker-Informationen
-    if (event.detail && event.detail.markerId) {
-      const markerId = event.detail.markerId;
-      if (instructions[markerId]) {
-        showInstruction(markerId);
-        lastDetectedMarker = markerId;
-      }
+  function onFound(markerId) {
+    if (!(markerId in instructions)) return;
+    if (markerHideTimeout) {
+      clearTimeout(markerHideTimeout);
+      markerHideTimeout = null;
     }
-    // AR.js 2.x: event.detail.type kann die barcodeValue sein
-    else if (event.detail && event.detail.type) {
-      const markerId = String(event.detail.type);
-      if (instructions[markerId]) {
-        showInstruction(markerId);
-        lastDetectedMarker = markerId;
-      }
-    }
+    showInstruction(markerId);
   }
 
   /**
-   * Event-Handler für marker-undetect (wenn Marker verlassen wird)
+   * Marker verlassen – Anweisung verzögert ausblenden
    */
-  function onMarkerUndetected(event) {
-    if (event.detail && event.detail.markerId) {
-      const markerId = event.detail.markerId;
-      if (markerId === lastDetectedMarker) {
-        // Verzögertes Ausblenden für flüssigeres Erlebnis
-        if (markerHideTimeout) clearTimeout(markerHideTimeout);
-        markerHideTimeout = setTimeout(hideInstruction, 500);
-      }
+  function onLost(markerId) {
+    if (markerId !== currentInstruction) return;
+    if (markerHideTimeout) clearTimeout(markerHideTimeout);
+    markerHideTimeout = setTimeout(function() {
+      markerHideTimeout = null;
+      hideInstruction();
+    }, 500);
+  }
+
+  /**
+   * Liefert die Barcode-Nummer aus einem AR.js markerFound/markerLost-Event
+   * (window-CustomEvent: detail = markerControls mit parameters.barcodeValue)
+   */
+  function barcodeValueFromDetail(detail) {
+    if (detail && detail.parameters && detail.parameters.type === 'barcode') {
+      return String(detail.parameters.barcodeValue);
     }
+    return null;
   }
 
   /**
@@ -133,26 +138,23 @@
   function init() {
     console.log('[AR] AR-Anleitung initialisiert');
 
-    // Event-Listener für Marker-Erkennung (AR.js 3.x)
-    document.addEventListener('marker-detected', onMarkerDetected);
-    document.addEventListener('marker-undetect', onMarkerUndetected);
+    // Primärweg: AR.js dispatcht markerFound/markerLost als CustomEvent auf window
+    window.addEventListener('markerFound', function(e) {
+      const value = barcodeValueFromDetail(e.detail);
+      if (value !== null) onFound(value);
+    });
+    window.addEventListener('markerLost', function(e) {
+      const value = barcodeValueFromDetail(e.detail);
+      if (value !== null) onLost(value);
+    });
 
-    // Alternative: A-Frame Event
-    const scene = document.querySelector('a-scene');
-    if (scene) {
-      scene.addEventListener('markerFound', function(evt) {
-        if (evt.detail && evt.detail.markerId && instructions[evt.detail.markerId]) {
-          showInstruction(evt.detail.markerId);
-          lastDetectedMarker = evt.detail.markerId;
-        }
-      });
-      scene.addEventListener('markerLost', function(evt) {
-        if (evt.detail && evt.detail.markerId) {
-          if (markerHideTimeout) clearTimeout(markerHideTimeout);
-          markerHideTimeout = setTimeout(hideInstruction, 500);
-        }
-      });
-    }
+    // Fallback: das <a-marker>-Element emittiert selbst markerFound/markerLost;
+    // die Barcode-Nummer steht dort im value-Attribut des Elements
+    document.querySelectorAll('a-marker[type="barcode"]').forEach(function(el) {
+      const value = String(el.getAttribute('value'));
+      el.addEventListener('markerFound', function() { onFound(value); });
+      el.addEventListener('markerLost', function() { onLost(value); });
+    });
 
     // Ladebildschirm ausblenden
     setTimeout(() => {

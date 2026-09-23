@@ -9,8 +9,8 @@
   <link rel="stylesheet" href="css/style.css">
   <!-- A-Frame -->
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-  <!-- AR.js – latest master (marker tracking) -->
-  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+  <!-- AR.js – lokales Bundle (kein CDN, vermeidet CDN-Probleme auf Android) -->
+  <script src="lib/aframe-ar.js"></script>
 </head>
 <body>
 
@@ -33,15 +33,23 @@
   </div>
 
   <!-- AR-Szene mit Barcode-Markern -->
+  <!--
+    Wichtig für Barcode-Marker (3x3_hamming_6_3):
+    - detectionMode: mono_and_matrix (Matrix-/Barcode-Erkennung muss aktiv sein)
+    - matrixCodeType: 3x3_HAMMING63 (passend zu den Markern aus der
+      artoolkit-barcode-markers-collection, Ordner 3x3_hamming_6_3)
+    - <a-marker type="barcode" value="N"> – die Barcode-Nummer wird über
+      "value" angegeben, NICHT über "src" (src wird bei Barcodes ignoriert)
+  -->
   <a-scene
     embedded
-    arjs="sourceType: webcam; sourceWidth: 640; sourceHeight: 480; displayWidth: 640; displayHeight: 480; cameraTexture: true; debugUIEnabled: true; detectionMode: monoAndColor; matrixCodeType: 3x3;"
+    arjs="sourceType: webcam; sourceWidth: 640; sourceHeight: 480; displayWidth: 640; displayHeight: 480; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3_HAMMING63;"
     vr-mode-ui="enabled: false"
     renderer="logarithmicDepthBuffer: true; antialias: true; alpha: true"
   >
 
     <!-- ============ MARKER 1: EINSCHALTER (Barcode 0) ============ -->
-    <a-marker type="barcode" src="marker/barcode_0.png" id="marker-onoff" smooth="count:3">
+    <a-marker type="barcode" value="0" id="marker-onoff" smooth="true" smooth-count="3">
       <a-entity position="0 0.15 0" scale="0.15 0.15 0.15">
         <a-plane
           src="images/onoff-instruction.svg"
@@ -51,7 +59,7 @@
           material="transparent: true; opacity: 0.95; side: double;"
         ></a-plane>
         <a-box
-          position="0 0.05 0"
+          position="0 0.05 -0.0015"
           width="0.42"
           height="0.27"
           depth="0.002"
@@ -76,7 +84,7 @@
     </a-marker>
 
     <!-- ============ MARKER 2: BOHRFUTTER (Barcode 1) ============ -->
-    <a-marker type="barcode" src="marker/barcode_1.png" id="marker-chuck" smooth="count:3">
+    <a-marker type="barcode" value="1" id="marker-chuck" smooth="true" smooth-count="3">
       <a-entity position="0 0.15 0" scale="0.15 0.15 0.15">
         <a-plane
           src="images/chuck-instruction.svg"
@@ -86,7 +94,7 @@
           material="transparent: true; opacity: 0.95; side: double;"
         ></a-plane>
         <a-box
-          position="0 0.05 0"
+          position="0 0.05 -0.0015"
           width="0.42"
           height="0.27"
           depth="0.002"
@@ -111,7 +119,7 @@
     </a-marker>
 
     <!-- ============ MARKER 3: DREHZAHLREGELER (Barcode 2) ============ -->
-    <a-marker type="barcode" src="marker/barcode_2.png" id="marker-speed" smooth="count:3">
+    <a-marker type="barcode" value="2" id="marker-speed" smooth="true" smooth-count="3">
       <a-entity position="0 0.15 0" scale="0.15 0.15 0.15">
         <a-plane
           src="images/speed-instruction.svg"
@@ -121,7 +129,7 @@
           material="transparent: true; opacity: 0.95; side: double;"
         ></a-plane>
         <a-box
-          position="0 0.05 0"
+          position="0 0.05 -0.0015"
           width="0.42"
           height="0.27"
           depth="0.002"
@@ -146,7 +154,7 @@
     </a-marker>
 
     <!-- ============ MARKER 4: SÄGEGUARD (Barcode 3) ============ -->
-    <a-marker type="barcode" src="marker/barcode_3.png" id="marker-guard" smooth="count:3">
+    <a-marker type="barcode" value="3" id="marker-guard" smooth="true" smooth-count="3">
       <a-entity position="0 0.15 0" scale="0.15 0.15 0.15">
         <a-plane
           src="images/guard-instruction.svg"
@@ -156,7 +164,7 @@
           material="transparent: true; opacity: 0.95; side: double;"
         ></a-plane>
         <a-box
-          position="0 0.05 0"
+          position="0 0.05 -0.0015"
           width="0.42"
           height="0.27"
           depth="0.002"

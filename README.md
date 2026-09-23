@@ -23,11 +23,13 @@ AR_js/
 │   ├── chuck-instruction.svg   # Bohrfutter-Anleitung
 │   ├── speed-instruction.svg   # Drehzahlregler-Anleitung
 │   └── guard-instruction.svg   # Sägeguide-Anleitung
-├── marker/                 # Barcode-Bilder für AR.js (3x3 Matrix)
-│   ├── barcode_0.svg       # Einschalter (Barcode 0)
-│   ├── barcode_1.svg       # Bohrfutter (Barcode 1)
-│   ├── barcode_2.svg       # Drehzahlregler (Barcode 2)
-│   └── barcode_3.svg       # Sägeguide (Barcode 3)
+├── marker/                 # Barcode-Bilder zum Ausdrucken (3x3 Hamming 6/3)
+│   ├── barcode_0.png       # Einschalter (Barcode 0)
+│   ├── barcode_1.png       # Bohrfutter (Barcode 1)
+│   ├── barcode_2.png       # Drehzahlregler (Barcode 2)
+│   └── barcode_3.png       # Sägeguide (Barcode 3)
+├── lib/
+│   └── aframe-ar.js        # AR.js-Bundle (lokal, kein CDN nötig)
 ├── qr/
 │   └── qr-code.png         # QR-Code zum Öffnen der AR-Seite
 └── generate_assets.py      # Script zum Generieren neuer Barcode-Bilder
@@ -52,36 +54,35 @@ python3 -m http.server 8080
 # Dann im Browser öffnen:
 # http://localhost:8080
 ```
+Achtung: Kamera-Zugriff gibt es nur über `https://` oder `http://localhost`.
+Der Test mit der Handy-Kamera muss also über die GitHub-Pages-URL (HTTPS) erfolgen.
 
 ## Deployment auf GitHub Pages
 
-### 1. GitHub Repository erstellen
-```bash
-# Neues Repository auf github.com erstellen (z.B. "AR_js")
-# Dann:
-cd /home/juli/Dokumente
-git init AR_js
-cd AR_js
-git add .
-git commit -m "Initial AR-Anleitung Projekt"
-git branch -M main
-git remote add origin https://github.com/JULI_USERNAME/AR_js.git
-git push -u origin main
-```
+Repository: https://github.com/carcoder123/AR_js_Borhmaschine
+Live-URL:   https://carcoder123.github.io/AR_js_Borhmaschine/
 
-### 2. GitHub Pages aktivieren
-1. Repository auf GitHub öffnen
+### 1. Neue Version veröffentlichen
+```bash
+cd /home/juli/Dokumente/AR_js
+git add .
+git commit -m "Beschreibung der Änderung"
+git push origin main
+```
+GitHub Pages baut automatisch neu (Quelle: Branch `main`, Ordner `/root`).
+
+### 2. GitHub Pages aktivieren (falls deaktiviert)
+1. Repository auf GitHub öffnen: https://github.com/carcoder123/AR_js_Borhmaschine
 2. Settings → Pages
 3. Source: "Deploy from a branch"
 4. Branch: main / root
 5. Save
+Status auch per CLI prüfbar: `gh api /repos/carcoder123/AR_js_Borhmaschine/pages`
 
-### 3. QR-Code aktualisieren
-Nachdem die Seite live ist, die URL aktualisieren:
+### 3. QR-Code prüfen
+Der QR-Code in `qr/qr-code.png` zeigt bereits auf die Live-URL. Nur bei URL-Wechsel neu generieren:
 ```bash
-# Neue URL im QR-Code generieren (z.B. https://juli.github.io/AR_js/)
-cd qr
-curl -sL "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=NEUE_URL&color=000000&bgcolor=ffffff" -o qr-code.png
+python3 generate_assets.py marker qr
 ```
 
 ## Barcode-Marker drucken
@@ -98,14 +99,18 @@ Die Barcode-Bilder in `marker/` können einfach ausgedruckt werden:
 python3 generate_assets.py marker qr
 ```
 
-Erzeugt Barcodes aus dem offiziellen [artoolkit-barcode-markers-collection](https://github.com/nicolocarpignoli/artoolkit-barcode-markers-collection) Repo (3x3_hamming_6_3 Format).
+Erzeugt Barcodes aus dem offiziellen [artoolkit-barcode-markers-collection](https://github.com/nicolocarpignoli/artoolkit-barcode-markers-collection) Repo (3x3_hamming_6_3 Format). Wichtig: Die generierten Marker nur mit `matrixCodeType: 3x3_HAMMING63` in `index.html` verwenden.
 
 ## Technische Details
 
-- **AR.js** (https://github.com/AR-js-org/AR.js) – Marker-Erkennung im Browser
-- **A-Frame** (https://aframe.io) – 3D-Rendering für AR-Elemente
-- **Barcode-Detection** – AR.js 3x3 Matrix Barcode (Werte 0-511)
-- **WebRTC** – Kamera-Zugriff (HTTPS erforderlich für Produktion)
+- **AR.js** (https://github.com/AR-js-org/AR.js) – Marker-Erkennung im Browser (Bundle lokal in `lib/aframe-ar.js`)
+- **A-Frame** (https://aframe.io) – 3D-Rendering für AR-Elemente (CDN, Version 1.6.0)
+- **Barcode-Detection** – AR.js 3x3 Hamming 6/3 Matrix-Code (Werte 0–511, hier 0–3)
+  - `<a-marker type="barcode" value="N">` – die Nummer steht im `value`-Attribut,
+    `src` wird bei Barcode-Markern ignoriert!
+  - `arjs="... detectionMode: mono_and_matrix; matrixCodeType: 3x3_HAMMING63; ..."`
+    – muss zu dem Marker-Format passen (Ordner `3x3_hamming_6_3` der Collection)
+- **WebRTC** – Kamera-Zugriff (HTTPS erforderlich, auch im LAN-Test!)
 
 ## Browser-Unterstützung
 
