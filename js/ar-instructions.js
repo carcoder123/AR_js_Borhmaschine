@@ -13,6 +13,24 @@
 (function() {
   'use strict';
 
+  // Panel-Entities mit `face-camera` drehen sich jeden Frame zur Kamera.
+  // So ist die Anleitungstafel immer aufrecht und lesbar, egal wie der
+  // Barcode-Marker auf der Maschine geklebt ist (sonst rotiert das Panel
+  // mit dem Marker mit und steht je nach Kleberichtung schief/auf dem Kopf).
+  if (window.AFRAME) {
+    AFRAME.registerComponent('face-camera', {
+      init: function () {
+        this._camPos = (window.THREE) ? new THREE.Vector3() : null;
+      },
+      tick: function () {
+        var cam = this.el.sceneEl && this.el.sceneEl.camera;
+        if (!cam || !this._camPos) return;
+        cam.getWorldPosition(this._camPos);
+        this.el.object3D.lookAt(this._camPos);
+      }
+    });
+  }
+
   // Anweisungen pro Marker (barcodeValue)
   const instructions = {
     '0': {
