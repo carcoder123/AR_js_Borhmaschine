@@ -54,6 +54,10 @@
     vr-mode-ui="enabled: false"
     renderer="logarithmicDepthBuffer: true; antialias: true; alpha: true"
   >
+    <!-- 3D-Modell-Assets (vorausgeladen, in Markern per ID referenziert) -->
+    <a-assets>
+      <a-asset-item id="model-white-mesh" src="3d_models/white_mesh.glb"></a-asset-item>
+    </a-assets>
 
     <!-- ============ MARKER 1: EINSCHALTER (Barcode 0) ============ -->
     <a-marker type="barcode" value="0" id="marker-onoff" smooth="true" smooth-count="3">
@@ -255,6 +259,43 @@
           width="1"
           color="#00ff88"
           position="0 0.33 0.005"
+        ></a-text>
+      </a-entity>
+    </a-marker>
+
+    <!-- ============ MARKER 5: 3D-MODELL (Barcode 4) ============ -->
+    <a-marker type="barcode" value="4" id="marker-model" smooth="true" smooth-count="3">
+      <a-box
+        width="1" height="1" depth="0.004"
+        position="0 0 0"
+        material="wireframe: true; color: #00ff88; opacity: 0.45; transparent: true"
+      ></a-box>
+      <a-ring
+        position="0 0 0.01"
+        radius-inner="0.30"
+        radius-outer="0.36"
+        segments-theta="64"
+        color="#00ff88"
+        material="shader: flat; opacity: 0.9; transparent: true; side: double"
+        animation="property: scale; from: 1 1 1; to: 1.15 1.15 1.15; dir: alternate; loop: true; dur: 900; easing: easeInOutSine"
+      ></a-ring>
+      <!-- 3D-Modell: bleibt immer aufrecht, dreht sich um die Hochachse
+           (upright-spin="speed: N" = Drehgeschwindigkeit in Grad/Sekunde) -->
+      <a-entity
+        gltf-model="src: #model-white-mesh"
+        position="0 0.55 0"
+        scale="0.3 0.3 0.3"
+        upright-spin="speed: 45"
+      ></a-entity>
+      <!-- Titel über dem Modell, immer zur Kamera gedreht -->
+      <a-entity position="0 1.05 0" face-camera>
+        <a-text
+          value="3D-Modell"
+          align="center"
+          anchor="center"
+          width="1.2"
+          color="#00ff88"
+          position="0 0 0.01"
         ></a-text>
       </a-entity>
     </a-marker>

@@ -47,7 +47,7 @@ if __name__ == '__main__':
     import urllib.parse
 
     print('Generiere AR.js 3x3_hamming_6_3 Barcode-Bilder (aus offiziellem Repo):')
-    for i in range(4):
+    for i in range(5):
         filename = os.path.join(marker_dir, f'barcode_{i}.png')
         download_barcode(i, filename)
 

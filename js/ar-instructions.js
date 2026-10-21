@@ -31,6 +31,38 @@
     });
   }
 
+  // Entities mit `upright-spin` bleiben immer aufrecht (Hochachse zeigt
+  // nach oben, wie auf dem Handybildschirm) und drehen sich gleichzeitig
+  // um ihre eigene Hochachse – z. B. für 3D-Modelle an einem Marker.
+  // Geschwindigkeit: `upright-spin="speed: 45"` (Grad pro Sekunde).
+  if (window.AFRAME) {
+    AFRAME.registerComponent('upright-spin', {
+      schema: { speed: { type: 'number', default: 45 } },
+      init: function () {
+        this._angle = 0;
+        this._last = null;
+        this._target = (window.THREE) ? new THREE.Vector3() : null;
+      },
+      tick: function (t, dt) {
+        if (!this._target) return;
+        if (this._last === null) { this._last = t; return; }
+        var d = Math.min(dt || 0, 100);
+        this._last = t;
+        this._angle = (this._angle + this.data.speed * d / 1000) % 360;
+
+        var cam = this.el.sceneEl && this.el.sceneEl.camera;
+        if (!cam) return;
+
+        // Wie face-camera: zuerst zur Kamera ausrichten (lookAt hält die
+        // Hochachse über den Up-Vektor aufrecht), dann um die eigene
+        // Hochachse weiterdrehen.
+        cam.getWorldPosition(this._target);
+        this.el.object3D.lookAt(this._target);
+        this.el.object3D.rotateY(THREE.MathUtils.degToRad(this._angle));
+      }
+    });
+  }
+
   // Anweisungen pro Marker (barcodeValue)
   const instructions = {
     '0': {
@@ -67,6 +99,15 @@
         'Lösen Sie die Schraube am Sägeguide',
         'Verstellen Sie die Position für die gewünschte Bohrtiefe',
         'Ziehen Sie die Schraube wieder fest'
+      ]
+    },
+    '4': {
+      title: '3D-Modell',
+      text: 'Das Modell dreht sich automatisch. Bewegen Sie das Handy darum herum, um es von allen Seiten zu betrachten.',
+      steps: [
+        'Das Modell bleibt immer aufrecht',
+        'Es dreht sich langsam um seine Hochachse',
+        'Mit dem Handy herumgehen für die Seitenansicht'
       ]
     }
   };
