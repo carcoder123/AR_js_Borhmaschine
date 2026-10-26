@@ -15,6 +15,14 @@
   "machines": [
     {
       "id": "bohrmaschine"
+    },
+    {
+      "id": "saege",
+      "name": "Säge"
+    },
+    {
+      "id": "test",
+      "name": "test"
     }
   ]
 }

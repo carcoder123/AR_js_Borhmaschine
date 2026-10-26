@@ -1,0 +1,8 @@
+{
+  "id": "test",
+  "name": "test",
+  "qrUrl": "https://carcoder123.github.io/AR_js_Borhmaschine/?machine=test",
+  "qrFile": "qr/test.png",
+  "revision": 1,
+  "markers": []
+}
