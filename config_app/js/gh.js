@@ -50,11 +50,22 @@
 
   async function api(s, path, opts) {
     opts = opts || {};
-    var res = await fetch(apiBase(s) + path, {
-      method: opts.method || 'GET',
-      headers: Object.assign(headers(s), opts.headers || {}),
-      body: opts.body ? JSON.stringify(opts.body) : undefined
-    });
+    var res;
+    try {
+      res = await fetch(apiBase(s) + path, {
+        method: opts.method || 'GET',
+        headers: Object.assign(headers(s), opts.headers || {}),
+        body: opts.body ? JSON.stringify(opts.body) : undefined
+      });
+    } catch (e) {
+      // fetch selbst fehlgeschlagen (kein HTTP-Fehler, sondern Netz/CORS)
+      var hint = (location.protocol === 'file:')
+        ? ' Die App wurde per Doppelklick (file://) geöffnet – Firefox blockiert dann alle API-Aufrufe. Bitte über http://localhost:8080/config_app/ oder die GitHub-Pages-URL öffnen.'
+        : ' Mögliche Ursachen: kein Internet, Blocker/NoScript blockiert api.github.com, oder der Seitenkontext ist ungültig.';
+      var err = new Error('Netzwerkfehler beim Aufruf der GitHub-API.' + hint + ' [' + (e.name || 'Error') + ': ' + (e.message || '') + ']');
+      err.network = true;
+      throw err;
+    }
     if (!res.ok) {
       var detail = '';
       try {

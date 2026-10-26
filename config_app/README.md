@@ -32,6 +32,15 @@ Der Barcode-Typ `3x3_HAMMING63` hat physikalisch genau **8 gültige Codes
 muss auf `3x3` (64 Werte) umstellen – dann sind aber **alle** Barcode-Bilder
 neu zu erzeugen und auszudrucken.
 
+## Wichtig: nicht per Doppelklick öffnen (Firefox)
+
+Die App muss über eine `http(s)://`-Adresse laufen – entweder GitHub Pages
+oder lokal per `python3 -m http.server 8080` im Projektordner und dann
+`http://localhost:8080/config_app/`. Wird die Datei per Doppelklick
+(`file://`) geöffnet, blockiert Firefox alle GitHub-API-Aufrufe
+(„NetworkError when attempting to fetch resource“). Chromium ist da
+toleranter, sauber ist nur die http-Variante.
+
 ## Einrichtung (einmalig)
 
 1. GitHub-Token erstellen: GitHub → Settings → Developer settings →

@@ -712,6 +712,10 @@
 
   async function testConnection() {
     collectGlobalForm();
+    if (location.protocol === 'file:') {
+      setStatus('✖ App läuft über file:// – Firefox blockiert hier alle API-Aufrufe. Bitte über http://localhost:8080/config_app/ (python3 -m http.server 8080 im Projektordner) oder die GitHub-Pages-URL öffnen.', 'err');
+      return;
+    }
     setStatus('Teste GitHub-Verbindung…');
     try {
       var r = await GH.testConnection();
@@ -801,13 +805,20 @@
   async function init() {
     wireEvents();
     refreshPendingList();
+    if (location.protocol === 'file:') {
+      setStatus('⚠ App über file:// geöffnet – in Firefox schlagen dann alle GitHub-Aufrufe fehl. Bitte über http://localhost:8080/config_app/ oder die GitHub-Pages-URL öffnen.', 'err');
+    }
     try {
       await loadConfig();
       await loadRepoLists();
       fillMarkerForm(); // Dropdowns nach Listen-Laden neu befüllen
     } catch (e) {
-      setStatus('✖ ' + e.message, 'err');
-      $('#marker-list').innerHTML = '<p class="dim">Konnte markers.json nicht laden.<br>' + esc(e.message) + '</p>';
+      var msg = e.message;
+      if (location.protocol === 'file:') {
+        msg = 'App wurde per Doppelklick (file://) geöffnet – daraus kann die Konfiguration nicht geladen werden. Bitte über http://localhost:8080/config_app/ oder die GitHub-Pages-URL öffnen. [' + msg + ']';
+      }
+      setStatus('✖ ' + msg, 'err');
+      $('#marker-list').innerHTML = '<p class="dim">Konnte markers.json nicht laden.<br>' + esc(msg) + '</p>';
     }
   }
 
