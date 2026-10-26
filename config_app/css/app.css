@@ -197,6 +197,15 @@ hr.sep { width: 100%; border: 0; border-top: 1px dashed var(--border); }
   max-width: 100%;
 }
 
+#qr-preview {
+  display: block;
+  background: #fff;
+  border-radius: 8px;
+  width: 160px;
+  height: 160px;
+  max-width: 100%;
+}
+
 .preview-wrap {
   background: var(--panel);
   border: 1px solid var(--border);

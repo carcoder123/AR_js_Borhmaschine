@@ -202,6 +202,10 @@
           <button id="btn-qr-regen" class="btn small">QR-Code neu erzeugen &amp; vormerken</button>
           <button id="btn-del-machine" class="btn small danger">🗑 Maschine löschen</button>
         </div>
+        <div class="row" style="margin-top:10px">
+          <label>QR-Vorschau</label>
+          <canvas id="qr-preview" width="240" height="240"></canvas>
+        </div>
         <p class="dim small-print">Die AR-Seite zeigt diese Maschine unter <b>?machine=&lt;id&gt;</b> (ohne Parameter die erste
         Maschine der Liste). Der QR-Code sollte auf genau diese URL zeigen. Barcode-Werte sind pro Maschine unabhängig –
         Barcode 0 kann bei jeder Maschine anders belegt sein.</p>

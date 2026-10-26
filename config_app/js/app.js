@@ -244,7 +244,19 @@
     selectMachine(id);
     showGlobalOnly();
     updateDirty();
-    setStatus('Maschine "' + name + '" angelegt – jetzt in der Sidebar Marker hinzufügen.', 'ok');
+    // QR-Code für die neue Maschine automatisch erzeugen und vormerken
+    generateQrBlob(tpl.qrUrl).then(function(blob) {
+      // Maschine könnte inzwischen wieder gelöscht worden sein
+      if (!machineById(id)) return;
+      var path = tpl.qrFile || ('qr/' + id + '.png');
+      state.pending[path] = { data: blob, label: 'QR-Code (' + tpl.qrUrl + ')', machine: id };
+      refreshPendingList();
+      updateDirty();
+      fillGlobalForm();
+      setStatus('Maschine "' + name + '" angelegt – QR-Code automatisch vorgemerkt (' + path + ').', 'ok');
+    }).catch(function(e) {
+      setStatus('Maschine "' + name + '" angelegt, aber QR-Code konnte nicht erzeugt werden: ' + e.message, 'err');
+    });
   }
 
   function deleteMachine() {
@@ -645,6 +657,8 @@
     $('#gh-repo').value = gh.repo;
     $('#gh-branch').value = gh.branch;
     $('#gh-token').value = gh.token;
+
+    fillQrPreview();
   }
 
   function collectGlobalForm() {
@@ -680,33 +694,76 @@
     });
   }
 
+  /**
+   * Erzeugt den QR-Code als Blob (PNG) für eine URL
+   */
+  function generateQrBlob(url) {
+    var qr = qrcode(0, 'M');
+    qr.addData(url);
+    qr.make();
+    var count = qr.getModuleCount();
+    var scale = Math.max(2, Math.floor(300 / count));
+    var size = count * scale;
+    var canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, size, size);
+    ctx.fillStyle = '#000000';
+    for (var r = 0; r < count; r++) {
+      for (var c = 0; c < count; c++) {
+        if (qr.isDark(r, c)) ctx.fillRect(c * scale, r * scale, scale, scale);
+      }
+    }
+    return new Promise(function(res, rej) {
+      canvas.toBlob(function(b) { b ? res(b) : rej(new Error('toBlob fehlgeschlagen')); }, 'image/png');
+    });
+  }
+
+  /** Zeichnet die QR-Vorschau für die URL im Eingabefeld */
+  function fillQrPreview() {
+    var canvas = $('#qr-preview');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var url = $('#m-qr-url').value.trim();
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (!url) {
+      ctx.fillStyle = '#8b97ad';
+      ctx.font = '13px sans-serif';
+      ctx.fillText('Keine URL gesetzt', 45, 122);
+      return;
+    }
+    try {
+      var qr = qrcode(0, 'M');
+      qr.addData(url);
+      qr.make();
+      var count = qr.getModuleCount();
+      var scale = Math.max(2, Math.floor(canvas.width / count));
+      var offset = Math.floor((canvas.width - count * scale) / 2);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#000000';
+      for (var r = 0; r < count; r++) {
+        for (var c = 0; c < count; c++) {
+          if (qr.isDark(r, c)) ctx.fillRect(offset + c * scale, offset + r * scale, scale, scale);
+        }
+      }
+    } catch (e) {
+      ctx.fillStyle = '#ff5566';
+      ctx.font = '12px sans-serif';
+      ctx.fillText('QR-Fehler: ' + String(e.message).slice(0, 24), 10, 122);
+    }
+  }
+
   async function regenerateQR() {
     var mf = curMachine();
     if (!mf || !mf.data) return;
     var url = $('#m-qr-url').value.trim();
     if (!url) { setStatus('Keine QR-URL gesetzt.', 'err'); return; }
     try {
-      var qr = qrcode(0, 'M');
-      qr.addData(url);
-      qr.make();
-      var count = qr.getModuleCount();
-      var scale = Math.max(2, Math.floor(300 / count));
-      var size = count * scale;
-      var canvas = document.createElement('canvas');
-      canvas.width = size;
-      canvas.height = size;
-      var ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, size, size);
-      ctx.fillStyle = '#000000';
-      for (var r = 0; r < count; r++) {
-        for (var c = 0; c < count; c++) {
-          if (qr.isDark(r, c)) ctx.fillRect(c * scale, r * scale, scale, scale);
-        }
-      }
-      var blob = await new Promise(function(res, rej) {
-        canvas.toBlob(function(b) { b ? res(b) : rej(new Error('toBlob fehlgeschlagen')); }, 'image/png');
-      });
+      var blob = await generateQrBlob(url);
       var path = mf.data.qrFile || ('qr/' + mf.data.id + '.png');
       state.pending[path] = { data: blob, label: 'QR-Code (' + url + ')', machine: state.selectedMachine };
       refreshPendingList();
@@ -977,6 +1034,7 @@
           if (state.selected != null) collectMarkerForm();
           collectGlobalForm();
           if (e.target.id === 'm-name') renderMachineList();
+          if (e.target.id === 'm-qr-url') fillQrPreview();
           updateDirty();
           updatePreview();
         });
