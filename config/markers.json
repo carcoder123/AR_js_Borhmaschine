@@ -1,0 +1,174 @@
+{
+  "version": 1,
+  "revision": 2,
+  "qrUrl": "https://carcoder123.github.io/AR_js_Borhmaschine/",
+  "scene": {
+    "sourceWidth": 640,
+    "sourceHeight": 480,
+    "displayWidth": 640,
+    "displayHeight": 480,
+    "detectionMode": "mono_and_matrix",
+    "matrixCodeType": "3x3_HAMMING63"
+  },
+  "overlay": {
+    "hideDelayMs": 500,
+    "loadingMs": 3000
+  },
+  "markers": [
+    {
+      "value": 0,
+      "id": "marker-onoff",
+      "title": "Einschalter",
+      "color": "#00ff88",
+      "smooth": true,
+      "smoothCount": 3,
+      "frame": { "enabled": true, "opacity": 0.45 },
+      "ring": { "enabled": true, "radiusInner": 0.3, "radiusOuter": 0.36, "pulseDur": 900, "pulseScale": 1.15, "opacity": 0.9 },
+      "beacon": { "enabled": true, "shape": "octahedron", "radius": 0.12, "height": 0.3, "spinDur": 6000, "bobDur": 1200 },
+      "panel": {
+        "enabled": true,
+        "image": "images/onoff-instruction.png",
+        "width": 0.8,
+        "height": 0.5,
+        "positionY": 0.82,
+        "bgColor": "#1a1a2e",
+        "bgOpacity": 0.92,
+        "titleSize": 1
+      },
+      "model": { "enabled": false, "src": "", "position": [0, 0.55, 0], "scale": 0.3, "spinSpeed": 45, "titleHeight": 1.05 },
+      "instruction": {
+        "title": "Einschalter",
+        "text": "Drücken Sie den roten Einschalter, um die Bohrmaschine zu starten.",
+        "steps": [
+          "Suchen Sie den roten Einschalter an der Seite der Bohrmaschine",
+          "Drücken Sie den Schalter einmal kurz für den Ein-Betrieb",
+          "Halten Sie den Schalter gedrückt für den Dauerbetrieb"
+        ]
+      }
+    },
+    {
+      "value": 1,
+      "id": "marker-chuck",
+      "title": "Bohrfutter",
+      "color": "#00ff88",
+      "smooth": true,
+      "smoothCount": 3,
+      "frame": { "enabled": true, "opacity": 0.45 },
+      "ring": { "enabled": true, "radiusInner": 0.3, "radiusOuter": 0.36, "pulseDur": 900, "pulseScale": 1.15, "opacity": 0.9 },
+      "beacon": { "enabled": true, "shape": "octahedron", "radius": 0.12, "height": 0.3, "spinDur": 6000, "bobDur": 1200 },
+      "panel": {
+        "enabled": true,
+        "image": "images/chuck-instruction.png",
+        "width": 0.8,
+        "height": 0.5,
+        "positionY": 0.82,
+        "bgColor": "#1a1a2e",
+        "bgOpacity": 0.92,
+        "titleSize": 1
+      },
+      "model": { "enabled": false, "src": "", "position": [0, 0.55, 0], "scale": 0.3, "spinSpeed": 45, "titleHeight": 1.05 },
+      "instruction": {
+        "title": "Bohrfutter",
+        "text": "Das Bohrfutter spannt den Bohrer. Drehen Sie den Ring gegen den Uhrzeigersinn zum Öffnen.",
+        "steps": [
+          "Drehen Sie den Spannringer gegen den Uhrzeigersinn",
+          "Legen Sie den Bohrer mit dem Schaft in die Aufnahme",
+          "Ziehen Sie den Spannringer fest – der Bohrer sitzt"
+        ]
+      }
+    },
+    {
+      "value": 2,
+      "id": "marker-speed",
+      "title": "Drehzahlregler",
+      "color": "#00ff88",
+      "smooth": true,
+      "smoothCount": 3,
+      "frame": { "enabled": true, "opacity": 0.45 },
+      "ring": { "enabled": true, "radiusInner": 0.3, "radiusOuter": 0.36, "pulseDur": 900, "pulseScale": 1.15, "opacity": 0.9 },
+      "beacon": { "enabled": true, "shape": "octahedron", "radius": 0.12, "height": 0.3, "spinDur": 6000, "bobDur": 1200 },
+      "panel": {
+        "enabled": true,
+        "image": "images/speed-instruction.png",
+        "width": 0.8,
+        "height": 0.5,
+        "positionY": 0.82,
+        "bgColor": "#1a1a2e",
+        "bgOpacity": 0.92,
+        "titleSize": 1
+      },
+      "model": { "enabled": false, "src": "", "position": [0, 0.55, 0], "scale": 0.3, "spinSpeed": 45, "titleHeight": 1.05 },
+      "instruction": {
+        "title": "Drehzahlregler",
+        "text": "Der Drehzahlregler stellt die Geschwindigkeit ein. Drehe den Ring für hohe/niedrige Drehzahlen.",
+        "steps": [
+          "Der Ring mit der Zahlenskala (1-10) regelt die Drehzahl",
+          "Niedrige Drehzahl (1-3): Für Metall oder kleine Bohrungen",
+          "Hohe Drehzahl (7-10): Für Holz oder große Bohrungen"
+        ]
+      }
+    },
+    {
+      "value": 3,
+      "id": "marker-guard",
+      "title": "Sägeguide",
+      "color": "#00ff88",
+      "smooth": true,
+      "smoothCount": 3,
+      "frame": { "enabled": true, "opacity": 0.45 },
+      "ring": { "enabled": true, "radiusInner": 0.3, "radiusOuter": 0.36, "pulseDur": 900, "pulseScale": 1.15, "opacity": 0.9 },
+      "beacon": { "enabled": true, "shape": "octahedron", "radius": 0.12, "height": 0.3, "spinDur": 6000, "bobDur": 1200 },
+      "panel": {
+        "enabled": true,
+        "image": "images/guard-instruction.png",
+        "width": 0.8,
+        "height": 0.5,
+        "positionY": 0.82,
+        "bgColor": "#1a1a2e",
+        "bgOpacity": 0.92,
+        "titleSize": 1
+      },
+      "model": { "enabled": false, "src": "", "position": [0, 0.55, 0], "scale": 0.3, "spinSpeed": 45, "titleHeight": 1.05 },
+      "instruction": {
+        "title": "Sägeguide",
+        "text": "Der Sägeguide dient auch als Tiefenanschlag. Verstellen Sie ihn für die gewünschte Bohrtiefe.",
+        "steps": [
+          "Lösen Sie die Schraube am Sägeguide",
+          "Verstellen Sie die Position für die gewünschte Bohrtiefe",
+          "Ziehen Sie die Schraube wieder fest"
+        ]
+      }
+    },
+    {
+      "value": 4,
+      "id": "marker-model",
+      "title": "3D-Modell",
+      "color": "#00ff88",
+      "smooth": true,
+      "smoothCount": 3,
+      "frame": { "enabled": true, "opacity": 0.45 },
+      "ring": { "enabled": true, "radiusInner": 0.3, "radiusOuter": 0.36, "pulseDur": 900, "pulseScale": 1.15, "opacity": 0.9 },
+      "beacon": { "enabled": false, "shape": "octahedron", "radius": 0.12, "height": 0.3, "spinDur": 6000, "bobDur": 1200 },
+      "panel": {
+        "enabled": false,
+        "image": "",
+        "width": 0.8,
+        "height": 0.5,
+        "positionY": 0.82,
+        "bgColor": "#1a1a2e",
+        "bgOpacity": 0.92,
+        "titleSize": 1.2
+      },
+      "model": { "enabled": true, "src": "3d_models/white_mesh.glb", "position": [0, 0.55, 0], "scale": 0.3, "spinSpeed": 45, "titleHeight": 1.05 },
+      "instruction": {
+        "title": "3D-Modell",
+        "text": "Das Modell dreht sich automatisch. Bewegen Sie das Handy darum herum, um es von allen Seiten zu betrachten.",
+        "steps": [
+          "Das Modell bleibt immer aufrecht",
+          "Es dreht sich langsam um seine Hochachse",
+          "Mit dem Handy herumgehen für die Seitenansicht"
+        ]
+      }
+    }
+  ]
+}

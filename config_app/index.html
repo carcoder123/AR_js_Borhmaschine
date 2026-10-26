@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AR.js Config-App</title>
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+  <header>
+    <h1>AR.js Konfiguration</h1>
+    <div id="status-wrap">
+      <span id="dot-dirty"></span>
+      <span id="status"></span>
+    </div>
+    <div class="header-actions">
+      <a id="commit-link" href="#" target="_blank" style="display:none"></a>
+      <button id="btn-reload" class="btn">Neu laden</button>
+      <button id="btn-save" class="btn primary">Speichern &amp; Pushen</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- ============ Sidebar ============ -->
+    <aside>
+      <h2>Marker</h2>
+      <div id="marker-list"></div>
+      <div id="add-zone"></div>
+      <button id="btn-edit-global" class="btn wide">⚙ Globale Einstellungen</button>
+    </aside>
+
+    <!-- ============ Marker-Formular ============ -->
+    <section id="marker-form" style="display:none">
+
+      <div class="cols">
+        <!-- Linke Spalte -->
+        <div class="col">
+          <fieldset>
+            <legend>Allgemein</legend>
+            <div class="row">
+              <label>Barcode-Wert</label><span id="f-value" class="static">–</span>
+            </div>
+            <div class="row">
+              <label>Titel</label><input id="f-title" type="text">
+            </div>
+            <div class="row">
+              <label>HTML-ID</label><input id="f-id" type="text">
+            </div>
+            <div class="row">
+              <label>Farbe</label><input id="f-color" type="color">
+            </div>
+            <div class="row">
+              <label>Glättung</label>
+              <span class="inline">
+                <input id="f-smooth" type="checkbox"> <label for="f-smooth" class="cb">aktiv</label>
+                <input id="f-smooth-count" type="number" step="1" min="1" max="20" style="width:5em"> <label class="cb">Frames</label>
+              </span>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Barcode-Bild (drucken &amp; aufkleben)</legend>
+            <canvas id="barcode-preview" width="280" height="280"></canvas>
+            <div class="btn-row">
+              <button id="btn-barcode-queue" class="btn small">Zum Upload vormerken</button>
+              <button id="btn-barcode-dl" class="btn small">PNG herunterladen</button>
+            </div>
+            <p class="dim small-print">Beim Anlegen eines neuen Markers wird das Barcode-Bild automatisch hochgeladen.
+            „Zum Upload vormerken“ erzwingt einen erneuten Upload (z. B. wenn die Datei im Repo fehlt).</p>
+            <button id="btn-check-barcodes" class="btn small">Prüfen: fehlende Barcode-Bilder im Repo</button>
+          </fieldset>
+
+          <fieldset>
+            <legend>Deko am Marker</legend>
+            <div class="row">
+              <label>Rahmen (Wireframe)</label>
+              <span class="inline">
+                <input id="f-frame" type="checkbox"> <label for="f-frame" class="cb">anzeigen</label>
+                opacity <input id="f-frame-opacity" type="number" step="0.05" min="0" max="1" style="width:6em">
+              </span>
+            </div>
+            <div class="row"><label>&nbsp;</label><hr class="sep"></div>
+            <div class="row">
+              <label>Ring (pulsierend)</label>
+              <span class="inline"><input id="f-ring" type="checkbox"> <label for="f-ring" class="cb">anzeigen</label></span>
+            </div>
+            <div class="row"><label>Innenradius</label><input id="f-ring-inner" type="number" step="0.01" style="width:8em"></div>
+            <div class="row"><label>Außenradius</label><input id="f-ring-outer" type="number" step="0.01" style="width:8em"></div>
+            <div class="row"><label>Puls-Dauer (ms)</label><input id="f-ring-dur" type="number" step="100" style="width:8em"></div>
+            <div class="row"><label>Puls-Faktor</label><input id="f-ring-scale" type="number" step="0.05" style="width:8em"></div>
+            <div class="row"><label>Deckkraft</label><input id="f-ring-opacity" type="number" step="0.05" min="0" max="1" style="width:8em"></div>
+            <div class="row"><label>&nbsp;</label><hr class="sep"></div>
+            <div class="row">
+              <label>3D-Beacon (schwebend)</label>
+              <span class="inline">
+                <input id="f-beacon" type="checkbox"> <label for="f-beacon" class="cb">anzeigen</label>
+                <select id="f-beacon-shape">
+                  <option value="octahedron">Oktaeder</option>
+                  <option value="box">Würfel</option>
+                </select>
+              </span>
+            </div>
+            <div class="row"><label>Größe (Radius)</label><input id="f-beacon-radius" type="number" step="0.01" style="width:8em"></div>
+            <div class="row"><label>Höhe über Marker</label><input id="f-beacon-height" type="number" step="0.05" style="width:8em"></div>
+            <div class="row"><label>Rotations-Dauer (ms)</label><input id="f-beacon-spin" type="number" step="500" style="width:8em"></div>
+            <div class="row"><label>Bob-Dauer (ms)</label><input id="f-beacon-bob" type="number" step="100" style="width:8em"></div>
+          </fieldset>
+        </div>
+
+        <!-- Rechte Spalte -->
+        <div class="col">
+          <fieldset>
+            <legend>Bild-Panel (Anleitungstafel)</legend>
+            <div class="row">
+              <label>Anzeigen</label>
+              <span class="inline"><input id="f-panel" type="checkbox"> <label for="f-panel" class="cb">Bild-Panel aktiv</label></span>
+            </div>
+            <div class="row">
+              <label>Bilddatei</label>
+              <span class="inline">
+                <input id="f-panel-image" type="text" placeholder="images/mein-bild.png">
+                <select id="f-image-select"></select>
+              </span>
+            </div>
+            <div class="row">
+              <label>Neues Bild</label>
+              <input id="f-image-upload" type="file" accept="image/*">
+            </div>
+            <div class="row"><label>Breite (m)</label><input id="f-panel-w" type="number" step="0.05" style="width:8em"></div>
+            <div class="row"><label>Höhe (m)</label><input id="f-panel-h" type="number" step="0.05" style="width:8em"></div>
+            <div class="row"><label>Höhe über Marker (m)</label><input id="f-panel-y" type="number" step="0.05" style="width:8em"></div>
+            <div class="row"><label>Hintergrundfarbe</label><input id="f-panel-bg" type="color"></div>
+            <div class="row"><label>Hintergrund-Deckkraft</label><input id="f-panel-bgopacity" type="number" step="0.05" min="0" max="1" style="width:8em"></div>
+            <div class="row"><label>Titelgröße</label><input id="f-panel-tsize" type="number" step="0.1" style="width:8em"></div>
+            <p class="dim small-print">Tipp: PNG mit Alpha-Kanal, Querformat ca. 1600×1000 px passt zu 0.8×0.5 m.</p>
+          </fieldset>
+
+          <fieldset>
+            <legend>3D-Modell</legend>
+            <div class="row">
+              <label>Anzeigen</label>
+              <span class="inline"><input id="f-model" type="checkbox"> <label for="f-model" class="cb">3D-Modell aktiv</label></span>
+            </div>
+            <div class="row">
+              <label>Modelldatei</label>
+              <span class="inline">
+                <input id="f-model-src" type="text" placeholder="3d_models/modell.glb">
+                <select id="f-model-select"></select>
+              </span>
+            </div>
+            <div class="row">
+              <label>Neues Modell</label>
+              <input id="f-model-upload" type="file" accept=".glb,.gltf">
+            </div>
+            <div class="row"><label>Position X/Y/Z (m)</label>
+              <span class="inline">
+                <input id="f-model-px" type="number" step="0.05" style="width:6em">
+                <input id="f-model-py" type="number" step="0.05" style="width:6em">
+                <input id="f-model-pz" type="number" step="0.05" style="width:6em">
+              </span>
+            </div>
+            <div class="row"><label>Skalierung</label><input id="f-model-scale" type="number" step="0.05" style="width:8em"></div>
+            <div class="row"><label>Drehgeschwindigkeit (°/s)</label><input id="f-model-spin" type="number" step="5" style="width:8em"></div>
+            <div class="row"><label>Titelhöhe (m)</label><input id="f-model-titley" type="number" step="0.05" style="width:8em"></div>
+            <p class="dim small-print">Format: .glb empfohlen. Das Modell bleibt aufrecht und dreht sich um die Hochachse.</p>
+          </fieldset>
+
+          <fieldset>
+            <legend>Anleitungstext (Overlay am Handy)</legend>
+            <div class="row"><label>Titel</label><input id="f-ins-title" type="text"></div>
+            <div class="row"><label>Text</label><textarea id="f-ins-text" rows="2"></textarea></div>
+            <div class="row"><label>Schritte</label><textarea id="f-ins-steps" rows="5" placeholder="Ein Schritt pro Zeile"></textarea></div>
+          </fieldset>
+        </div>
+      </div>
+
+      <div class="preview-wrap">
+        <h2>Vorschau (schematisch)</h2>
+        <iframe id="preview-frame" title="Vorschau"></iframe>
+        <button id="btn-del-marker" class="btn danger">🗑 Marker löschen</button>
+      </div>
+    </section>
+
+    <!-- ============ Globale Einstellungen ============ -->
+    <section id="global-form" style="display:none">
+      <fieldset>
+        <legend>Kamera / Erkennung</legend>
+        <div class="row"><label>Kamera-Auflösung (Breite)</label><input id="g-source-w" type="number" step="10" style="width:8em"></div>
+        <div class="row"><label>Kamera-Auflösung (Höhe)</label><input id="g-source-h" type="number" step="10" style="width:8em"></div>
+        <div class="row"><label>Anzeige-Breite</label><input id="g-display-w" type="number" step="10" style="width:8em"></div>
+        <div class="row"><label>Anzeige-Höhe</label><input id="g-display-h" type="number" step="10" style="width:8em"></div>
+        <div class="row">
+          <label>Erkennungsmodus</label>
+          <select id="g-detection">
+            <option value="mono_and_matrix">mono_and_matrix (Barcode + Bild-Marker)</option>
+            <option value="mono">mono (nur Bild-Marker)</option>
+            <option value="color_and_matrix">color_and_matrix</option>
+            <option value="color">color</option>
+          </select>
+        </div>
+        <div class="row">
+          <label>Barcode-Typ</label>
+          <select id="g-matrix">
+            <option value="3x3_HAMMING63">3x3_HAMMING63 (Werte 0–7, aktuell verwendet)</option>
+            <option value="3x3">3x3 (Werte 0–63, andere Marker-Bilder nötig!)</option>
+            <option value="3x3_PARITY65">3x3_PARITY65</option>
+          </select>
+          <p class="dim small-print">Achtung: Barcode-Bilder und Typ müssen zusammenpassen. Die mitgelieferten
+          Marker sind 3x3_HAMMING63 (0–7). Bei Wechsel auf 3x3 (0–63) müssen alle Barcode-Bilder neu erzeugt werden.</p>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Overlay-Verhalten</legend>
+        <div class="row"><label>Ausblende-Verzögerung (ms)</label><input id="g-hide-delay" type="number" step="100" style="width:8em"></div>
+        <div class="row"><label>Ladebildschirm-Dauer (ms)</label><input id="g-loading-ms" type="number" step="500" style="width:8em"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>QR-Code</legend>
+        <div class="row"><label>URL für QR-Code</label><input id="g-qr-url" type="text" style="width:26em"></div>
+        <div class="btn-row">
+          <button id="btn-qr-regen" class="btn small">QR-Code neu erzeugen &amp; vormerken</button>
+        </div>
+        <p class="dim small-print">Der QR-Code wird beim Speichern als qr/qr-code.png hochgeladen und ersetzt den auf der Desktop-Seite angezeigten Code.</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>GitHub-Zugang</legend>
+        <div class="row"><label>Owner</label><input id="gh-owner" type="text" style="width:18em"></div>
+        <div class="row"><label>Repository</label><input id="gh-repo" type="text" style="width:18em"></div>
+        <div class="row"><label>Branch</label><input id="gh-branch" type="text" style="width:10em"></div>
+        <div class="row">
+          <label>Token</label>
+          <input id="gh-token" type="password" placeholder="ghp_… / github_pat_…" style="width:26em" autocomplete="off">
+        </div>
+        <div class="btn-row">
+          <button id="btn-gh-test" class="btn small">Verbindung testen</button>
+        </div>
+        <p class="dim small-print">
+          Empfehlung: <b>feingranularer Token</b> (Settings → Developer settings → Fine-grained tokens),
+          nur für dieses Repository, Berechtigung <b>Contents: Read and write</b>, sinnvolle Ablaufzeit.
+          Der Token wird ausschließlich im localStorage dieses Browsers gespeichert – er wird nie
+          ins Repository geschrieben oder an Dritte übertragen.
+        </p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Nächster Commit</legend>
+        <div id="pending-list"><span class="dim">keine neuen Dateien</span></div>
+      </fieldset>
+    </section>
+  </main>
+
+  <script src="lib/qrcode.js"></script>
+  <script src="js/barcodes.js"></script>
+  <script src="js/gh.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

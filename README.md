@@ -30,10 +30,25 @@ AR_js/
 │   └── barcode_3.png       # Sägeguide (Barcode 3)
 ├── lib/
 │   └── aframe-ar.js        # AR.js-Bundle (lokal, kein CDN nötig)
+├── config/
+│   └── markers.json        # Zentrale Konfiguration aller Marker
+├── config_app/             # Web-App zum Verwalten der Marker (siehe unten)
 ├── qr/
 │   └── qr-code.png         # QR-Code zum Öffnen der AR-Seite
 └── generate_assets.py      # Script zum Generieren neuer Barcode-Bilder
 ```
+
+## Marker über die Config-App verwalten (empfohlen)
+
+Die AR-Szene wird aus `config/markers.json` aufgebaut (siehe `index.html` +
+`js/ar-main.js`). Neue Marker, Bilder, 3D-Modelle, Farben, Animationen und
+Anleitungstexte pflegt man am einfachsten über die **Config-App** unter
+`config_app/` – sie läuft ohne eigenen Server und pusht Änderungen direkt
+als Commits ins Repo (GitHub Pages baut automatisch neu). Details:
+`config_app/README.md`.
+
+Wichtig: Der Barcode-Typ `3x3_HAMMING63` hat genau **8 gültige Werte (0–7)**.
+Die Werte 0–4 sind belegt, 5–7 sind frei.
 
 ## Marker-Übersicht
 

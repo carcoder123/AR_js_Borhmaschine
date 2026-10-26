@@ -1,5 +1,14 @@
 # Anleitung für Einsteiger: Grafiken zu Barcodes hinzufügen & ändern
 
+> **Einfacher geht's mit der Config-App:** Unter `config_app/` gibt es eine
+> Web-App, mit der sich alles hier Beschriebene per Klick machen lässt
+> (neue Barcodes anlegen, Bilder/3D-Modelle hochladen, Farben/Texte
+> ändern) – ohne eigene Server, Änderungen werden direkt als Commit nach
+> GitHub gepusht. Siehe `config_app/README.md`.
+>
+> Die folgende manuelle Anleitung bleibt gültig und erklärt, wie es im
+> Hintergrund funktioniert.
+
 Diese Anleitung erklärt Schritt für Schritt, wie du in diesem AR-Projekt
 Grafiken austauschst und neue Barcodes mit neuen Grafiken anlegst.
 Vorkenntnisse sind nicht nötig – es reicht, Dateien öffnen und Text ändern zu können.
