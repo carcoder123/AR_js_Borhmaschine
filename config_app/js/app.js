@@ -1,10 +1,15 @@
 /**
  * AR.js Config-App – UI-Logik
  *
- * Bearbeitet config/markers.json im AR-Projekt-Repo und pusht Änderungen
- * (inkl. Barcode-Bilder, Anleitungsbilder, 3D-Modelle, QR-Code) als
- * Commits direkt über die GitHub API. GitHub Pages baut danach automatisch
- * neu – kein eigener Server nötig.
+ * Verwaltet beliebig viele Maschinen ("Top-Level"): Jede Maschine hat ihre
+ * eigene Marker-Liste (config/machines/<id>.json), die Registry steht in
+ * config/machines.json (inkl. globaler Kamera-/Overlay-Einstellungen).
+ *
+ * Änderungen werden per GitHub-API als Commits ins Repo gepusht; GitHub
+ * Pages baut danach automatisch neu – kein eigener Server nötig.
+ *
+ * AR-Seiten-URLs: index.html                -> erste Maschine
+ *                 index.html?machine=<id>   -> bestimmte Maschine
  */
 
 (function() {
@@ -12,30 +17,32 @@
 
   // ---------- Konstanten ----------
 
-  var CONFIG_PATH = 'config/markers.json';
+  var REGISTRY_PATH = 'config/machines.json';
+  var MACHINE_DIR = 'config/machines/';
   var MARKER_DIR = 'marker/';
   var IMAGES_DIR = 'images/';
   var MODELS_DIR = '3d_models/';
-  var QR_PATH = 'qr/qr-code.png';
 
   var DEFAULT_GH = { owner: 'carcoder123', repo: 'AR_js_Borhmaschine', branch: 'main', token: '' };
 
   // ---------- Zustand ----------
 
   var state = {
-    config: null,          // geladene/aktuelle Konfiguration
-    original: null,        // unverändert geladene Konfiguration (Dirty-Check)
+    registry: null,        // config/machines.json (machines + scene + overlay)
+    registryOriginal: null,
+    machineFiles: {},      // id -> { data, original }   (Daten der Maschinen-Dateien)
+    selectedMachine: null, // id der aktuellen Maschine
+    config: null,          // = machineFiles[selectedMachine].data (Shortcut)
     selected: null,        // Index des ausgewählten Markers
     pending: {},           // path -> {data, label} für den nächsten Commit
-    imagesList: [],        // Dateien in images/
-    modelsList: [],        // Dateien in 3d_models/
-    markerFiles: [],       // Dateien in marker/
-    isNew: false,          // aktuell ausgewählter Marker ist neu (noch nicht gespeichert)
+    imagesList: [],
+    modelsList: [],
+    isNew: false,          // aktueller Marker ist noch nicht gespeichert
+    newMachineIds: [],     // in dieser Sitzung neu angelegte Maschinen
     saving: false
   };
 
   var $ = function(sel) { return document.querySelector(sel); };
-  var $$ = function(sel) { return document.querySelectorAll(sel); };
 
   function el(tag, attrs, children) {
     var e = document.createElement(tag);
@@ -48,11 +55,20 @@
     return (typeof n === 'number' && isFinite(n)) ? n : d;
   }
 
+  function num(v, def) {
+    var n = parseFloat(v);
+    return (typeof n === 'number' && isFinite(n)) ? n : def;
+  }
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+  }
+
   function slug(s) {
     return String(s || '').toLowerCase()
       .replace(/[äöüß]/g, function(c) { return ({ 'ä': 'ae', 'ö': 'oe', 'ü': 'ue', 'ß': 'ss' })[c]; })
       .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '') || 'marker';
+      .replace(/^-+|-+$/g, '') || 'maschine';
   }
 
   function setStatus(msg, kind) {
@@ -61,7 +77,15 @@
     s.className = kind || '';
   }
 
-  // ---------- Marker-Template ----------
+  function curMachine() {
+    return state.machineFiles[state.selectedMachine] || null;
+  }
+
+  function machineById(id) {
+    return state.machineFiles[id] || null;
+  }
+
+  // ---------- Templates ----------
 
   function newMarkerTemplate(value, title) {
     return {
@@ -80,8 +104,21 @@
     };
   }
 
+  function newMachineTemplate(id, name) {
+    var gh = GH.settings();
+    var pagesBase = 'https://' + gh.owner + '.github.io/' + gh.repo + '/';
+    return {
+      id: id,
+      name: name,
+      qrUrl: pagesBase + '?machine=' + id,
+      qrFile: 'qr/' + id + '.png',
+      revision: 1,
+      markers: []
+    };
+  }
+
   function usedValues() {
-    return (state.config.markers || []).map(function(m) { return m.value; });
+    return ((state.config && state.config.markers) || []).map(function(m) { return m.value; });
   }
 
   function freeValues() {
@@ -93,45 +130,168 @@
     return free;
   }
 
-  // ---------- Konfiguration laden ----------
+  // ---------- Laden ----------
 
-  async function loadConfig() {
+  async function loadAll() {
     setStatus('Lade Konfiguration…');
-    var text = await GH.readFile(CONFIG_PATH);
-    if (text == null) throw new Error(CONFIG_PATH + ' nicht gefunden – liegt die App im richtigen Repo?');
-    var cfg;
+    var regText = await GH.readFile(REGISTRY_PATH);
+    if (regText == null) throw new Error(REGISTRY_PATH + ' nicht gefunden.');
+    var reg;
     try {
-      cfg = JSON.parse(text);
+      reg = JSON.parse(regText);
     } catch (e) {
-      throw new Error('markers.json ist kein gültiges JSON: ' + e.message);
+      throw new Error('machines.json ist kein gültiges JSON: ' + e.message);
     }
-    state.config = cfg;
-    state.original = JSON.stringify(cfg);
+    reg.machines = reg.machines || [];
+    state.registry = reg;
+    state.registryOriginal = JSON.stringify(reg);
+
+    // Alle Maschinen-Dateien laden
+    state.machineFiles = {};
+    await Promise.all(reg.machines.map(async function(entry) {
+      var id = entry.id;
+      var text = await GH.readFile(MACHINE_DIR + id + '.json');
+      if (text == null) {
+        console.warn('[ConfigApp] Maschinen-Datei fehlt:', id);
+        state.machineFiles[id] = { data: newMachineTemplate(id, entry.name || id), original: null };
+        return;
+      }
+      var data = JSON.parse(text);
+      state.machineFiles[id] = { data: data, original: JSON.stringify(data) };
+    }));
+
     state.pending = {};
     state.isNew = false;
-    state.selected = null;
-    renderMarkerList();
-    if (cfg.markers && cfg.markers.length) {
-      selectMarker(0);
-    } else {
-      showGlobalOnly();
-    }
+
+    var first = reg.machines.length ? reg.machines[0].id : null;
+    selectMachine(first);
     fillGlobalForm();
     updateDirty();
-    setStatus('Geladen. ' + (cfg.markers || []).length + ' Marker.', 'ok');
+    setStatus('Geladen. ' + reg.machines.length + ' Maschine(n).', 'ok');
   }
 
+  // ---------- Maschinen ----------
+
+  function machineChanged(id) {
+    var mf = machineById(id);
+    if (!mf) return false;
+    return JSON.stringify(mf.data) !== mf.original;
+  }
+
+  function changedMachineFiles() {
+    var out = [];
+    Object.keys(state.machineFiles).forEach(function(id) {
+      if (machineChanged(id)) out.push(id);
+    });
+    return out;
+  }
+
+  function renderMachineList() {
+    var list = $('#machine-list');
+    list.innerHTML = '';
+    (state.registry.machines || []).forEach(function(entry) {
+      var mf = machineById(entry.id);
+      var data = mf ? mf.data : { markers: [] };
+      var item = el('div', { 'class': 'machine-item' + (entry.id === state.selectedMachine ? ' active' : '') });
+      var label = el('div', { 'class': 'machine-label' });
+      label.innerHTML = '<b>' + esc(data.name || entry.id) + '</b><br><span class="dim">' +
+        (data.markers || []).length + ' Marker' +
+        (machineChanged(entry.id) ? ' · geändert' : '') +
+        (state.newMachineIds.indexOf(entry.id) !== -1 ? ' · neu' : '') + '</span>';
+      item.appendChild(label);
+      item.addEventListener('click', function() { selectMachine(entry.id); });
+      list.appendChild(item);
+    });
+  }
+
+  function selectMachine(id) {
+    if (!id || !machineById(id)) {
+      var first = (state.registry.machines || [])[0];
+      id = first ? first.id : null;
+    }
+    state.selectedMachine = id;
+    state.config = machineById(id) ? machineById(id).data : null;
+    state.selected = null;
+    state.isNew = false;
+
+    $('#marker-form').style.display = 'none';
+    $('#global-form').style.display = 'none';
+
+    if (state.config && state.config.markers && state.config.markers.length) {
+      selectMarker(0);
+    }
+    renderMachineList();
+    renderMarkerList();
+    fillGlobalForm();
+    updateDirty();
+    updatePreview();
+  }
+
+  function addMachine() {
+    var name = prompt('Name der neuen Maschine (z. B. "Schraubstock"):', '');
+    if (name === null) return;
+    name = name.trim();
+    if (!name) return;
+    var id = slug(name);
+    if (machineById(id)) {
+      alert('Eine Maschine mit der ID "' + id + '" existiert bereits.');
+      return;
+    }
+    var tpl = newMachineTemplate(id, name);
+    state.machineFiles[id] = { data: tpl, original: null };
+    state.registry.machines.push({ id: id, name: name });
+    state.newMachineIds.push(id);
+    selectMachine(id);
+    showGlobalOnly();
+    updateDirty();
+    setStatus('Maschine "' + name + '" angelegt – jetzt in der Sidebar Marker hinzufügen.', 'ok');
+  }
+
+  function deleteMachine() {
+    var id = state.selectedMachine;
+    var mf = machineById(id);
+    if (!mf) return;
+    var n = (mf.data.markers || []).length;
+    var pushedNote = (state.newMachineIds.indexOf(id) === -1)
+      ? 'Die Maschinen-Datei bleibt im Repo bestehen (kann dort manuell gelöscht werden).'
+      : 'Wichtig: Die Maschine wurde noch nie gepusht – nach dem Speichern existiert sie weder im Repo noch hier.';
+    if (!confirm('Maschine "' + (mf.data.name || id) + '" wirklich löschen?\n\n' +
+        n + ' Marker gehen verloren. Hochgeladene Dateien (Bilder, Modelle, Barcodes) bleiben im Repo.\n' + pushedNote)) return;
+
+    dropPendingForMachine(id);
+    state.registry.machines = state.registry.machines.filter(function(m) { return m.id !== id; });
+    delete state.machineFiles[id];
+    state.newMachineIds = state.newMachineIds.filter(function(x) { return x !== id; });
+    state.selectedMachine = null;
+    state.config = null;
+    state.selected = null;
+    var first = (state.registry.machines || [])[0];
+    if (first) {
+      selectMachine(first.id);
+    } else {
+      showGlobalOnly();
+      renderMachineList();
+      renderMarkerList();
+      fillGlobalForm();
+    }
+    updateDirty();
+  }
+
+  // ---------- Dirty / Speichern-Button ----------
+
   function isDirty() {
-    if (!state.config) return false;
-    if (JSON.stringify(state.config) !== state.original) return true;
+    if (JSON.stringify(state.registry) !== state.registryOriginal) return true;
+    if (changedMachineFiles().length) return true;
     return Object.keys(state.pending).length > 0;
   }
 
   function updateDirty() {
     var d = isDirty();
+    var fileCount = Object.keys(state.pending).length + changedMachineFiles().length +
+      (JSON.stringify(state.registry) !== state.registryOriginal ? 1 : 0);
     var btn = $('#btn-save');
     btn.disabled = !d || state.saving;
-    btn.textContent = d ? 'Speichern & Pushen (' + (Object.keys(state.pending).length ? (Object.keys(state.pending).length + ' Dateien, ') : '') + '1 Commit)' : 'Alles gespeichert';
+    btn.textContent = d ? 'Speichern & Pushen (' + fileCount + ' Dateien, 1 Commit)' : 'Alles gespeichert';
     $('#dot-dirty').style.visibility = d ? 'visible' : 'hidden';
   }
 
@@ -140,6 +300,13 @@
   function renderMarkerList() {
     var list = $('#marker-list');
     list.innerHTML = '';
+
+    if (!state.config) {
+      list.innerHTML = '<p class="dim">Keine Maschine ausgewählt.</p>';
+      $('#add-zone').innerHTML = '';
+      return;
+    }
+
     var markers = (state.config.markers || []).slice().sort(function(a, b) { return a.value - b.value; });
     markers.forEach(function(m) {
       var idx = state.config.markers.indexOf(m);
@@ -159,11 +326,15 @@
       list.appendChild(item);
     });
 
+    if (!markers.length) {
+      list.innerHTML = '<p class="dim">Diese Maschine hat noch keine Marker.<br>Unten einen freien Barcode wählen.</p>';
+    }
+
     var add = $('#add-zone');
     add.innerHTML = '';
     var free = freeValues();
     if (!free.length) {
-      add.innerHTML = '<p class="dim">Alle ' + (ARCodes.MAX_VALUE + 1) + ' Barcodes (0–' + ARCodes.MAX_VALUE + ') sind belegt.</p>';
+      add.innerHTML = '<p class="dim">Alle ' + (ARCodes.MAX_VALUE + 1) + ' Barcodes (0–' + ARCodes.MAX_VALUE + ') sind bei dieser Maschine belegt.</p>';
     } else {
       var p = el('p', { 'class': 'dim' });
       p.textContent = 'Neuer Marker (freie Barcodes):';
@@ -179,10 +350,6 @@
     }
   }
 
-  function esc(s) {
-    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
-  }
-
   function addMarker(value) {
     var title = prompt('Titel für den neuen Marker (Barcode ' + value + '):', 'Neuer Marker');
     if (title === null) return;
@@ -191,8 +358,8 @@
     state.config.markers.push(m);
     state.isNew = true;
     state.selected = state.config.markers.length - 1;
-    // Barcode-Bild für den neuen Marker bereitstellen
     queueBarcode(value);
+    renderMachineList();
     renderMarkerList();
     selectMarker(state.selected);
     updateDirty();
@@ -226,11 +393,12 @@
     $('#marker-form').style.display = 'none';
     $('#global-form').style.display = '';
     $('#btn-edit-global').classList.add('active');
+    fillGlobalForm();
     updatePreview();
   }
 
   function curMarker() {
-    return (state.selected != null) ? state.config.markers[state.selected] : null;
+    return (state.selected != null && state.config) ? state.config.markers[state.selected] : null;
   }
 
   function fillMarkerForm() {
@@ -288,10 +456,7 @@
     $('#f-ins-text').value = ins.text || '';
     $('#f-ins-steps').value = (ins.steps || []).join('\n');
 
-    // Barcode-Vorschau
     drawBarcodePreview();
-
-    // Datei-Dropdowns befüllen
     fillImageSelect();
     fillModelSelect();
   }
@@ -349,11 +514,6 @@
     m.instruction.steps = $('#f-ins-steps').value.split('\n').map(function(s) { return s.trim(); }).filter(Boolean);
   }
 
-  function num(v, def) {
-    var n = parseFloat(v);
-    return (typeof n === 'number' && isFinite(n)) ? n : def;
-  }
-
   // ---------- Barcode ----------
 
   function drawBarcodePreview() {
@@ -381,12 +541,19 @@
 
   function queueBarcode(value) {
     var path = MARKER_DIR + 'barcode_' + value + '.png';
-    // synchron geht toBlob nicht – Blob wird asynchron in pending gepusht
     return ARCodes.toBlob(value, 944).then(function(blob) {
-      state.pending[path] = { data: blob, label: 'Barcode-Bild ' + value };
+      state.pending[path] = { data: blob, label: 'Barcode-Bild ' + value, machine: state.selectedMachine };
       updateDirty();
       refreshPendingList();
     });
+  }
+
+  /** Vormerkungen einer Maschine verwerfen (z. B. beim Löschen der Maschine) */
+  function dropPendingForMachine(id) {
+    Object.keys(state.pending).forEach(function(p) {
+      if (state.pending[p].machine === id) delete state.pending[p];
+    });
+    refreshPendingList();
   }
 
   // ---------- Datei-Uploads ----------
@@ -399,7 +566,7 @@
     return slug(stem) + ext.toLowerCase();
   }
 
-  function wireUpload(inputId, dir, fieldId, listElId) {
+  function wireUpload(inputId, dir, fieldId) {
     $('#' + inputId).addEventListener('change', async function(e) {
       var file = e.target.files[0];
       if (!file) return;
@@ -408,7 +575,7 @@
       var name = sanitizeName(file.name);
       var path = dir + name;
       var buf = new Uint8Array(await file.arrayBuffer());
-      state.pending[path] = { data: buf, label: name };
+      state.pending[path] = { data: buf, label: name, machine: state.selectedMachine };
       $('#' + fieldId).value = path;
       collectMarkerForm();
       refreshPendingList();
@@ -435,7 +602,7 @@
     selEl.appendChild(opt);
     var current = field.value;
     var found = false;
-    list.forEach(function(f) {
+    (list || []).forEach(function(f) {
       var o = el('option', { value: f.path });
       o.textContent = f.path + ' (' + Math.round(f.size / 1024) + ' KB)';
       if (f.path === current) { o.selected = true; found = true; }
@@ -452,18 +619,26 @@
   // ---------- Globale Einstellungen ----------
 
   function fillGlobalForm() {
-    var cfg = state.config;
-    var s = cfg.scene || {};
+    // Aktuelle Maschine
+    var mf = curMachine();
+    var data = mf ? mf.data : null;
+    $('#m-name').value = data ? (data.name || '') : '';
+    $('#m-qr-url').value = data ? (data.qrUrl || '') : '';
+    $('#m-qr-file').textContent = data ? (data.qrFile || ('qr/' + (data.id || '') + '.png')) : '–';
+    $('#btn-del-machine').style.display = state.selectedMachine ? '' : 'none';
+
+    // Projekt-global (Registry)
+    var reg = state.registry || {};
+    var s = reg.scene || {};
     $('#g-source-w').value = fmt(s.sourceWidth, 640);
     $('#g-source-h').value = fmt(s.sourceHeight, 480);
     $('#g-display-w').value = fmt(s.displayWidth, 640);
     $('#g-display-h').value = fmt(s.displayHeight, 480);
     $('#g-detection').value = s.detectionMode || 'mono_and_matrix';
     $('#g-matrix').value = s.matrixCodeType || '3x3_HAMMING63';
-    var o = cfg.overlay || {};
+    var o = reg.overlay || {};
     $('#g-hide-delay').value = fmt(o.hideDelayMs, 500);
     $('#g-loading-ms').value = fmt(o.loadingMs, 3000);
-    $('#g-qr-url').value = cfg.qrUrl || '';
 
     var gh = Object.assign({}, DEFAULT_GH, GH.settings());
     $('#gh-owner').value = gh.owner;
@@ -473,18 +648,29 @@
   }
 
   function collectGlobalForm() {
-    var cfg = state.config;
-    cfg.scene = cfg.scene || {};
-    cfg.scene.sourceWidth = num($('#g-source-w').value, 640);
-    cfg.scene.sourceHeight = num($('#g-source-h').value, 480);
-    cfg.scene.displayWidth = num($('#g-display-w').value, 640);
-    cfg.scene.displayHeight = num($('#g-display-h').value, 480);
-    cfg.scene.detectionMode = $('#g-detection').value;
-    cfg.scene.matrixCodeType = $('#g-matrix').value;
-    cfg.overlay = cfg.overlay || {};
-    cfg.overlay.hideDelayMs = num($('#g-hide-delay').value, 500);
-    cfg.overlay.loadingMs = num($('#g-loading-ms').value, 3000);
-    cfg.qrUrl = $('#g-qr-url').value.trim();
+    // Aktuelle Maschine
+    var mf = curMachine();
+    if (mf && mf.data) {
+      mf.data.name = $('#m-name').value.trim() || mf.data.id;
+      mf.data.qrUrl = $('#m-qr-url').value.trim();
+      // Namen auch in der Registry pflegen (für AR-Seiten-Links)
+      (state.registry.machines || []).forEach(function(entry) {
+        if (entry.id === mf.data.id) entry.name = mf.data.name;
+      });
+    }
+
+    // Projekt-global
+    var reg = state.registry;
+    reg.scene = reg.scene || {};
+    reg.scene.sourceWidth = num($('#g-source-w').value, 640);
+    reg.scene.sourceHeight = num($('#g-source-h').value, 480);
+    reg.scene.displayWidth = num($('#g-display-w').value, 640);
+    reg.scene.displayHeight = num($('#g-display-h').value, 480);
+    reg.scene.detectionMode = $('#g-detection').value;
+    reg.scene.matrixCodeType = $('#g-matrix').value;
+    reg.overlay = reg.overlay || {};
+    reg.overlay.hideDelayMs = num($('#g-hide-delay').value, 500);
+    reg.overlay.loadingMs = num($('#g-loading-ms').value, 3000);
 
     GH.saveSettings({
       owner: $('#gh-owner').value.trim(),
@@ -495,7 +681,9 @@
   }
 
   async function regenerateQR() {
-    var url = $('#g-qr-url').value.trim();
+    var mf = curMachine();
+    if (!mf || !mf.data) return;
+    var url = $('#m-qr-url').value.trim();
     if (!url) { setStatus('Keine QR-URL gesetzt.', 'err'); return; }
     try {
       var qr = qrcode(0, 'M');
@@ -513,18 +701,17 @@
       ctx.fillStyle = '#000000';
       for (var r = 0; r < count; r++) {
         for (var c = 0; c < count; c++) {
-          if (qr.isDark(r, c)) {
-            ctx.fillRect(c * scale, r * scale, scale, scale);
-          }
+          if (qr.isDark(r, c)) ctx.fillRect(c * scale, r * scale, scale, scale);
         }
       }
       var blob = await new Promise(function(res, rej) {
         canvas.toBlob(function(b) { b ? res(b) : rej(new Error('toBlob fehlgeschlagen')); }, 'image/png');
       });
-      state.pending[QR_PATH] = { data: blob, label: 'QR-Code (' + url + ')' };
+      var path = mf.data.qrFile || ('qr/' + mf.data.id + '.png');
+      state.pending[path] = { data: blob, label: 'QR-Code (' + url + ')', machine: state.selectedMachine };
       refreshPendingList();
       updateDirty();
-      setStatus('QR-Code erzeugt – wird beim Speichern als ' + QR_PATH + ' hochgeladen.', 'ok');
+      setStatus('QR-Code erzeugt – wird beim Speichern als ' + path + ' hochgeladen.', 'ok');
     } catch (e) {
       setStatus('QR-Fehler: ' + e.message, 'err');
     }
@@ -537,11 +724,11 @@
       var have = {};
       files.forEach(function(f) { have[f.name] = true; });
       var missing = [];
-      (state.config.markers || []).forEach(function(m) {
+      ((state.config && state.config.markers) || []).forEach(function(m) {
         if (!have['barcode_' + m.value + '.png']) missing.push(m.value);
       });
       if (!missing.length) {
-        setStatus('Alle Barcode-Bilder sind im Repo vorhanden.', 'ok');
+        setStatus('Alle Barcode-Bilder dieser Maschine sind im Repo vorhanden.', 'ok');
       } else {
         missing.forEach(function(v) { queueBarcode(v); });
         setStatus('Fehlende Barcode-Bilder bereitgestellt: ' + missing.join(', '), 'ok');
@@ -561,8 +748,10 @@
 
   function buildPreview() {
     var m = curMarker();
-    if (!m) { $('#preview-frame').srcdoc = '<p style="font-family:sans-serif;color:#888;padding:2em">Kein Marker ausgewählt</p>'; return; }
-    var frame = document.getElementById('preview-frame');
+    if (!m) {
+      $('#preview-frame').srcdoc = '<p style="font-family:sans-serif;color:#888;padding:2em">Kein Marker ausgewählt</p>';
+      return;
+    }
     var doc = '<!DOCTYPE html><html><head><meta charset="utf-8">' +
       '<base href="../">' +
       '<script src="https://aframe.io/releases/1.6.0/aframe.min.js"><\/script>' +
@@ -578,7 +767,7 @@
       'AFRAME.registerComponent("face-camera",{init:function(){this._c=window.THREE?new THREE.Vector3():null},tick:function(){var c=this.el.sceneEl&&this.el.sceneEl.camera;if(!c||!this._c)return;c.getWorldPosition(this._c);this.el.object3D.lookAt(this._c);}});' +
       'AFRAME.registerComponent("upright-spin",{schema:{speed:{type:"number",default:45}},init:function(){this._a=0;this._l=null;this._t=window.THREE?new THREE.Vector3():null},tick:function(t,dt){if(!this._t)return;if(this._l===null){this._l=t;return}var d=Math.min(dt||0,100);this._l=t;this._a=(this._a+this.data.speed*d/1000)%360;var c=this.el.sceneEl&&this.el.sceneEl.camera;if(!c)return;c.getWorldPosition(this._t);this.el.object3D.lookAt(this._t);this.el.object3D.rotateY(THREE.MathUtils.degToRad(this._a));}});' +
       '<\/script></body></html>';
-    frame.srcdoc = doc;
+    $('#preview-frame').srcdoc = doc;
   }
 
   function previewMarkerHTML(m) {
@@ -633,7 +822,6 @@
 
   async function save() {
     if (state.saving) return;
-    // Formular -> Zustand
     if (state.selected != null) collectMarkerForm();
     collectGlobalForm();
 
@@ -644,26 +832,47 @@
       return;
     }
 
-    state.config.revision = num(state.config.revision, 1) + 1;
+    var files = [];
 
-    var files = [{ path: CONFIG_PATH, data: JSON.stringify(state.config, null, 2) + '\n' }];
+    // Registry (wenn geändert)
+    if (JSON.stringify(state.registry) !== state.registryOriginal) {
+      files.push({ path: REGISTRY_PATH, data: JSON.stringify(state.registry, null, 2) + '\n' });
+    }
+
+    // Geänderte Maschinen-Dateien (Revision erhöhen, außer bei ganz neuen Maschinen)
+    changedMachineFiles().forEach(function(id) {
+      var mf = machineById(id);
+      if (state.newMachineIds.indexOf(id) === -1) {
+        mf.data.revision = num(mf.data.revision, 1) + 1;
+      }
+      files.push({ path: MACHINE_DIR + id + '.json', data: JSON.stringify(mf.data, null, 2) + '\n' });
+    });
+
+    // Neue Dateien (Barcodes, Bilder, Modelle, QR)
     Object.keys(state.pending).forEach(function(p) {
       files.push({ path: p, data: state.pending[p].data });
     });
 
-    var msg = commitMessage();
+    if (!files.length) { updateDirty(); return; }
+
+    var msg = commitMessage(changedMachineFiles(), Object.keys(state.pending).length);
 
     state.saving = true;
     updateDirty();
     setStatus('Pushing ' + files.length + ' Datei(en) zu GitHub…');
     try {
       var res = await GH.commitFiles(files, msg);
-      state.original = JSON.stringify(state.config);
+      // Originale aktualisieren
+      state.registryOriginal = JSON.stringify(state.registry);
+      changedMachineFiles().forEach(function(id) {
+        state.machineFiles[id].original = JSON.stringify(state.machineFiles[id].data);
+      });
+      state.newMachineIds = [];
       state.pending = {};
       state.isNew = false;
       refreshPendingList();
       updateDirty();
-      renderMarkerList();
+      renderMachineList();
       setStatus('✔ Pushed: ' + res.commitSha.slice(0, 7) + ' – GitHub Pages baut in 1–2 Minuten neu. Lokal: git pull.', 'ok');
       var link = $('#commit-link');
       link.href = res.commitUrl;
@@ -671,8 +880,13 @@
       link.style.display = '';
       await loadRepoLists();
     } catch (e) {
-      // revision zurücksetzen, damit ein erneuter Versuch nicht doppelte Revisionen erzeugt
-      state.config.revision = num(state.config.revision, 1) - 1;
+      // Revisionen zurücksetzen, damit ein erneuter Versuch nicht doppelte Revisionen erzeugt
+      changedMachineFiles().forEach(function(id) {
+        var mf = machineById(id);
+        if (state.newMachineIds.indexOf(id) === -1) {
+          mf.data.revision = Math.max(1, num(mf.data.revision, 1) - 1);
+        }
+      });
       updateDirty();
       setStatus('✖ Fehler: ' + e.message, 'err');
     } finally {
@@ -681,16 +895,17 @@
     }
   }
 
-  function commitMessage() {
-    var paths = Object.keys(state.pending);
-    var assetInfo = paths.length ? ' + ' + paths.length + ' Datei(en)' : '';
-    if (state.isNew && state.selected != null) {
-      var m = state.config.markers[state.selected];
-      return 'Config-App: Marker "' + m.title + '" (Barcode ' + m.value + ') hinzugefügt' + assetInfo;
+  function commitMessage(changedIds, assetCount) {
+    var assetInfo = assetCount ? ' + ' + assetCount + ' Datei(en)' : '';
+    var regChanged = JSON.stringify(state.registry) !== state.registryOriginal;
+    if (changedIds.length === 1 && !regChanged) {
+      var data = machineById(changedIds[0]).data;
+      var isNewMachine = state.newMachineIds.indexOf(changedIds[0]) !== -1;
+      var verb = isNewMachine ? 'hinzugefügt' : 'aktualisiert';
+      return 'Config-App: Maschine "' + (data.name || changedIds[0]) + '" ' + verb + assetInfo;
     }
-    if (state.selected != null) {
-      var m2 = state.config.markers[state.selected];
-      return 'Config-App: Marker "' + m2.title + '" (Barcode ' + m2.value + ') aktualisiert' + assetInfo;
+    if (changedIds.length > 1 || (regChanged && changedIds.length)) {
+      return 'Config-App: Maschinen aktualisiert (' + changedIds.join(', ') + ')' + assetInfo;
     }
     return 'Config-App: Konfiguration aktualisiert' + assetInfo;
   }
@@ -731,8 +946,10 @@
     $('#btn-save').addEventListener('click', save);
     $('#btn-reload').addEventListener('click', function() {
       if (isDirty() && !confirm('Ungespeicherte Änderungen verwerfen und neu laden?')) return;
-      loadConfig().catch(function(e) { setStatus('✖ ' + e.message, 'err'); });
+      loadAll().catch(function(e) { setStatus('✖ ' + e.message, 'err'); });
     });
+    $('#btn-add-machine').addEventListener('click', addMachine);
+    $('#btn-del-machine').addEventListener('click', deleteMachine);
     $('#btn-edit-global').addEventListener('click', function() {
       if (state.selected != null) collectMarkerForm();
       showGlobalOnly();
@@ -750,25 +967,18 @@
     $('#btn-gh-test').addEventListener('click', testConnection);
 
     // Formular -> Zustand + Vorschau (live)
-    var formIds = ['#marker-form', '#global-form'];
     ['input', 'change'].forEach(function(evt) {
-      formIds.forEach(function(f) {
+      ['#marker-form', '#global-form'].forEach(function(f) {
         $(f).addEventListener(evt, function(e) {
-          if (e.target.id === 'gh-token' || e.target.id === 'gh-owner' || e.target.id === 'gh-repo' || e.target.id === 'gh-branch') {
+          if (['gh-token', 'gh-owner', 'gh-repo', 'gh-branch'].indexOf(e.target.id) !== -1) {
             collectGlobalForm();
             return;
           }
           if (state.selected != null) collectMarkerForm();
           collectGlobalForm();
-          if (e.target.id === 'f-color') {
-            var item = $$('.marker-item')[state.selected];
-          }
-          renderMarkerList();
+          if (e.target.id === 'm-name') renderMachineList();
           updateDirty();
           updatePreview();
-          if (e.target.id === 'f-color' || e.target.id === 'f-title' || e.target.id === 'f-id') {
-            drawBarcodePreview();
-          }
         });
       });
     });
@@ -806,10 +1016,10 @@
     wireEvents();
     refreshPendingList();
     if (location.protocol === 'file:') {
-      setStatus('⚠ App über file:// geöffnet – in Firefox schlagen dann alle GitHub-Aufrufe fehl. Bitte über http://localhost:8080/config_app/ oder die GitHub-Pages-URL öffnen.', 'err');
+      setStatus('⚠ App über file:// geöffnet – daraus kann die Konfiguration nicht geladen werden. Bitte über http://localhost:8080/config_app/ oder die GitHub-Pages-URL öffnen.', 'err');
     }
     try {
-      await loadConfig();
+      await loadAll();
       await loadRepoLists();
       fillMarkerForm(); // Dropdowns nach Listen-Laden neu befüllen
     } catch (e) {
@@ -818,7 +1028,7 @@
         msg = 'App wurde per Doppelklick (file://) geöffnet – daraus kann die Konfiguration nicht geladen werden. Bitte über http://localhost:8080/config_app/ oder die GitHub-Pages-URL öffnen. [' + msg + ']';
       }
       setStatus('✖ ' + msg, 'err');
-      $('#marker-list').innerHTML = '<p class="dim">Konnte markers.json nicht laden.<br>' + esc(msg) + '</p>';
+      $('#machine-list').innerHTML = '<p class="dim">Konnte die Konfiguration nicht laden.<br>' + esc(msg) + '</p>';
     }
   }
 

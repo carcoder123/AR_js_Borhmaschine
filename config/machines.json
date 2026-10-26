@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "scene": {
+    "sourceWidth": 640,
+    "sourceHeight": 480,
+    "displayWidth": 640,
+    "displayHeight": 480,
+    "detectionMode": "mono_and_matrix",
+    "matrixCodeType": "3x3_HAMMING63"
+  },
+  "overlay": {
+    "hideDelayMs": 500,
+    "loadingMs": 3000
+  },
+  "machines": [
+    {
+      "id": "bohrmaschine"
+    }
+  ]
+}

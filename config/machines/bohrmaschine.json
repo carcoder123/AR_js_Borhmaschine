@@ -1,19 +1,9 @@
 {
-  "version": 1,
-  "revision": 2,
+  "id": "bohrmaschine",
+  "name": "Bohrmaschine",
   "qrUrl": "https://carcoder123.github.io/AR_js_Borhmaschine/",
-  "scene": {
-    "sourceWidth": 640,
-    "sourceHeight": 480,
-    "displayWidth": 640,
-    "displayHeight": 480,
-    "detectionMode": "mono_and_matrix",
-    "matrixCodeType": "3x3_HAMMING63"
-  },
-  "overlay": {
-    "hideDelayMs": 500,
-    "loadingMs": 3000
-  },
+  "qrFile": "qr/qr-code.png",
+  "revision": 2,
   "markers": [
     {
       "value": 0,
@@ -22,9 +12,26 @@
       "color": "#00ff88",
       "smooth": true,
       "smoothCount": 3,
-      "frame": { "enabled": true, "opacity": 0.45 },
-      "ring": { "enabled": true, "radiusInner": 0.3, "radiusOuter": 0.36, "pulseDur": 900, "pulseScale": 1.15, "opacity": 0.9 },
-      "beacon": { "enabled": true, "shape": "octahedron", "radius": 0.12, "height": 0.3, "spinDur": 6000, "bobDur": 1200 },
+      "frame": {
+        "enabled": true,
+        "opacity": 0.45
+      },
+      "ring": {
+        "enabled": true,
+        "radiusInner": 0.3,
+        "radiusOuter": 0.36,
+        "pulseDur": 900,
+        "pulseScale": 1.15,
+        "opacity": 0.9
+      },
+      "beacon": {
+        "enabled": true,
+        "shape": "octahedron",
+        "radius": 0.12,
+        "height": 0.3,
+        "spinDur": 6000,
+        "bobDur": 1200
+      },
       "panel": {
         "enabled": true,
         "image": "images/onoff-instruction.png",
@@ -35,7 +42,18 @@
         "bgOpacity": 0.92,
         "titleSize": 1
       },
-      "model": { "enabled": false, "src": "", "position": [0, 0.55, 0], "scale": 0.3, "spinSpeed": 45, "titleHeight": 1.05 },
+      "model": {
+        "enabled": false,
+        "src": "",
+        "position": [
+          0,
+          0.55,
+          0
+        ],
+        "scale": 0.3,
+        "spinSpeed": 45,
+        "titleHeight": 1.05
+      },
       "instruction": {
         "title": "Einschalter",
         "text": "Drücken Sie den roten Einschalter, um die Bohrmaschine zu starten.",
@@ -53,9 +71,26 @@
       "color": "#00ff88",
       "smooth": true,
       "smoothCount": 3,
-      "frame": { "enabled": true, "opacity": 0.45 },
-      "ring": { "enabled": true, "radiusInner": 0.3, "radiusOuter": 0.36, "pulseDur": 900, "pulseScale": 1.15, "opacity": 0.9 },
-      "beacon": { "enabled": true, "shape": "octahedron", "radius": 0.12, "height": 0.3, "spinDur": 6000, "bobDur": 1200 },
+      "frame": {
+        "enabled": true,
+        "opacity": 0.45
+      },
+      "ring": {
+        "enabled": true,
+        "radiusInner": 0.3,
+        "radiusOuter": 0.36,
+        "pulseDur": 900,
+        "pulseScale": 1.15,
+        "opacity": 0.9
+      },
+      "beacon": {
+        "enabled": true,
+        "shape": "octahedron",
+        "radius": 0.12,
+        "height": 0.3,
+        "spinDur": 6000,
+        "bobDur": 1200
+      },
       "panel": {
         "enabled": true,
         "image": "images/chuck-instruction.png",
@@ -66,7 +101,18 @@
         "bgOpacity": 0.92,
         "titleSize": 1
       },
-      "model": { "enabled": false, "src": "", "position": [0, 0.55, 0], "scale": 0.3, "spinSpeed": 45, "titleHeight": 1.05 },
+      "model": {
+        "enabled": false,
+        "src": "",
+        "position": [
+          0,
+          0.55,
+          0
+        ],
+        "scale": 0.3,
+        "spinSpeed": 45,
+        "titleHeight": 1.05
+      },
       "instruction": {
         "title": "Bohrfutter",
         "text": "Das Bohrfutter spannt den Bohrer. Drehen Sie den Ring gegen den Uhrzeigersinn zum Öffnen.",
@@ -84,9 +130,26 @@
       "color": "#00ff88",
       "smooth": true,
       "smoothCount": 3,
-      "frame": { "enabled": true, "opacity": 0.45 },
-      "ring": { "enabled": true, "radiusInner": 0.3, "radiusOuter": 0.36, "pulseDur": 900, "pulseScale": 1.15, "opacity": 0.9 },
-      "beacon": { "enabled": true, "shape": "octahedron", "radius": 0.12, "height": 0.3, "spinDur": 6000, "bobDur": 1200 },
+      "frame": {
+        "enabled": true,
+        "opacity": 0.45
+      },
+      "ring": {
+        "enabled": true,
+        "radiusInner": 0.3,
+        "radiusOuter": 0.36,
+        "pulseDur": 900,
+        "pulseScale": 1.15,
+        "opacity": 0.9
+      },
+      "beacon": {
+        "enabled": true,
+        "shape": "octahedron",
+        "radius": 0.12,
+        "height": 0.3,
+        "spinDur": 6000,
+        "bobDur": 1200
+      },
       "panel": {
         "enabled": true,
         "image": "images/speed-instruction.png",
@@ -97,7 +160,18 @@
         "bgOpacity": 0.92,
         "titleSize": 1
       },
-      "model": { "enabled": false, "src": "", "position": [0, 0.55, 0], "scale": 0.3, "spinSpeed": 45, "titleHeight": 1.05 },
+      "model": {
+        "enabled": false,
+        "src": "",
+        "position": [
+          0,
+          0.55,
+          0
+        ],
+        "scale": 0.3,
+        "spinSpeed": 45,
+        "titleHeight": 1.05
+      },
       "instruction": {
         "title": "Drehzahlregler",
         "text": "Der Drehzahlregler stellt die Geschwindigkeit ein. Drehe den Ring für hohe/niedrige Drehzahlen.",
@@ -115,9 +189,26 @@
       "color": "#00ff88",
       "smooth": true,
       "smoothCount": 3,
-      "frame": { "enabled": true, "opacity": 0.45 },
-      "ring": { "enabled": true, "radiusInner": 0.3, "radiusOuter": 0.36, "pulseDur": 900, "pulseScale": 1.15, "opacity": 0.9 },
-      "beacon": { "enabled": true, "shape": "octahedron", "radius": 0.12, "height": 0.3, "spinDur": 6000, "bobDur": 1200 },
+      "frame": {
+        "enabled": true,
+        "opacity": 0.45
+      },
+      "ring": {
+        "enabled": true,
+        "radiusInner": 0.3,
+        "radiusOuter": 0.36,
+        "pulseDur": 900,
+        "pulseScale": 1.15,
+        "opacity": 0.9
+      },
+      "beacon": {
+        "enabled": true,
+        "shape": "octahedron",
+        "radius": 0.12,
+        "height": 0.3,
+        "spinDur": 6000,
+        "bobDur": 1200
+      },
       "panel": {
         "enabled": true,
         "image": "images/guard-instruction.png",
@@ -128,7 +219,18 @@
         "bgOpacity": 0.92,
         "titleSize": 1
       },
-      "model": { "enabled": false, "src": "", "position": [0, 0.55, 0], "scale": 0.3, "spinSpeed": 45, "titleHeight": 1.05 },
+      "model": {
+        "enabled": false,
+        "src": "",
+        "position": [
+          0,
+          0.55,
+          0
+        ],
+        "scale": 0.3,
+        "spinSpeed": 45,
+        "titleHeight": 1.05
+      },
       "instruction": {
         "title": "Sägeguide",
         "text": "Der Sägeguide dient auch als Tiefenanschlag. Verstellen Sie ihn für die gewünschte Bohrtiefe.",
@@ -146,9 +248,26 @@
       "color": "#00ff88",
       "smooth": true,
       "smoothCount": 3,
-      "frame": { "enabled": true, "opacity": 0.45 },
-      "ring": { "enabled": true, "radiusInner": 0.3, "radiusOuter": 0.36, "pulseDur": 900, "pulseScale": 1.15, "opacity": 0.9 },
-      "beacon": { "enabled": false, "shape": "octahedron", "radius": 0.12, "height": 0.3, "spinDur": 6000, "bobDur": 1200 },
+      "frame": {
+        "enabled": true,
+        "opacity": 0.45
+      },
+      "ring": {
+        "enabled": true,
+        "radiusInner": 0.3,
+        "radiusOuter": 0.36,
+        "pulseDur": 900,
+        "pulseScale": 1.15,
+        "opacity": 0.9
+      },
+      "beacon": {
+        "enabled": false,
+        "shape": "octahedron",
+        "radius": 0.12,
+        "height": 0.3,
+        "spinDur": 6000,
+        "bobDur": 1200
+      },
       "panel": {
         "enabled": false,
         "image": "",
@@ -159,7 +278,18 @@
         "bgOpacity": 0.92,
         "titleSize": 1.2
       },
-      "model": { "enabled": true, "src": "3d_models/white_mesh.glb", "position": [0, 0.55, 0], "scale": 0.3, "spinSpeed": 45, "titleHeight": 1.05 },
+      "model": {
+        "enabled": true,
+        "src": "3d_models/white_mesh.glb",
+        "position": [
+          0,
+          0.55,
+          0
+        ],
+        "scale": 0.3,
+        "spinSpeed": 45,
+        "titleHeight": 1.05
+      },
       "instruction": {
         "title": "3D-Modell",
         "text": "Das Modell dreht sich automatisch. Bewegen Sie das Handy darum herum, um es von allen Seiten zu betrachten.",

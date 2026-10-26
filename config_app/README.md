@@ -8,6 +8,11 @@ automatisch neu.
 
 ## Was die App kann
 
+- **Maschinen verwalten** – mehrere Maschinen ("Top-Level") pro Repo, jede mit
+  eigener Marker-Liste und QR-Code. Die AR-Seite wählt per URL:
+  `index.html` = erste Maschine, `index.html?machine=<id>` = bestimmte Maschine.
+  Konfiguration: `config/machines.json` (Registry + globale Kamera-Einstellungen)
+  und `config/machines/<id>.json` (Marker pro Maschine).
 - **Barcode-Marker verwalten** – Anlegen (freie Werte 0–7), Bearbeiten, Löschen
 - **Barcode-Bilder erzeugen** – offline im Browser, pixelidentisch zur
   offiziellen artoolkit-Collection (3x3 Hamming 6/3), Upload + Download als PNG

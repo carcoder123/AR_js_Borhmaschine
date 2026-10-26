@@ -231,18 +231,90 @@
     console.error('[AR] Konfigurationsfehler:', msg);
   }
 
+  // ---------- Maschinen-Auswahl & Desktop-Hinweis ----------
+
+  function urlParam(name) {
+    try {
+      return new URLSearchParams(window.location.search).get(name);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /**
+   * Passt Titel, Desktop-Hinweis und QR-Code an die gewählte Maschine an
+   * und listet weitere Maschinen als Umschalt-Links.
+   */
+  function updateDesktopHint(mf, reg) {
+    document.title = mf.name + ' – AR Anleitung';
+    var h1 = document.querySelector('#desktop-hinweis h1');
+    if (h1) h1.textContent = '🔧 ' + mf.name + ' – AR Anleitung';
+
+    // QR-Bild: pro Maschine, mit Fallback auf qr/qr-code.png
+    var img = document.querySelector('#qr-section img');
+    if (img) {
+      var primary = mf.qrFile || ('qr/' + mf.id + '.png');
+      img.onerror = function () {
+        img.onerror = null;
+        img.src = 'qr/qr-code.png';
+      };
+      img.src = primary;
+    }
+
+    // Weitere Maschinen als Links (nur Desktop-Hinweis)
+    var others = (reg.machines || []).filter(function (m) { return m.id !== mf.id; });
+    if (others.length) {
+      var p = document.createElement('p');
+      p.className = 'small';
+      p.innerHTML = 'Weitere Maschinen: ' + others.map(function (m) {
+        return '<a href="?machine=' + encodeURIComponent(m.id) + '">' + esc(m.name || m.id) + '</a>';
+      }).join(' · ');
+      var hint = document.getElementById('desktop-hinweis');
+      if (hint) hint.appendChild(p);
+    }
+  }
+
   // ---------- Start ----------
 
   // Cache-Busting: Konfiguration immer frisch laden, damit Änderungen aus
   // der Config-App sofort sichtbar sind (ohne Cache-Rätselraten).
-  fetch('config/markers.json?v=' + Date.now(), { cache: 'no-store' })
+  //
+  // Maschinen-Auswahl: ?machine=<id> in der URL, sonst die erste Maschine
+  // in config/machines.json. Pro Maschine liegt eine eigene Datei unter
+  // config/machines/<id>.json (Marker + Name + QR-URL).
+  fetch('config/machines.json?v=' + Date.now(), { cache: 'no-store' })
     .then(function (r) {
-      if (!r.ok) throw new Error('HTTP ' + r.status + ' bei config/markers.json');
+      if (!r.ok) throw new Error('HTTP ' + r.status + ' bei config/machines.json');
       return r.json();
     })
-    .then(function (cfg) {
-      window.MARKER_CONFIG = cfg;
-      buildScene(cfg);
+    .then(function (reg) {
+      var wanted = urlParam('machine');
+      var entry = null;
+      (reg.machines || []).forEach(function (m) {
+        if (!entry && m.id === wanted) entry = m;
+      });
+      if (!entry) entry = (reg.machines || [])[0];
+      if (!entry) throw new Error('Keine Maschinen in config/machines.json definiert.');
+
+      return fetch('config/machines/' + encodeURIComponent(entry.id) + '.json?v=' + Date.now(), { cache: 'no-store' })
+        .then(function (r) {
+          if (!r.ok) throw new Error('HTTP ' + r.status + ' bei config/machines/' + entry.id + '.json');
+          return r.json();
+        })
+        .then(function (mf) {
+          mf.id = mf.id || entry.id;
+          mf.name = mf.name || entry.name || entry.id;
+          var cfg = {
+            revision: mf.revision,
+            markers: mf.markers || [],
+            scene: reg.scene || {},
+            overlay: reg.overlay || {}
+          };
+          window.MARKER_CONFIG = cfg;
+          window.MARKER_MACHINE = mf;
+          updateDesktopHint(mf, reg);
+          buildScene(cfg);
+        });
     })
     .catch(showError);
 

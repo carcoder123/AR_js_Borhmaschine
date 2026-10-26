@@ -24,7 +24,10 @@
   <main>
     <!-- ============ Sidebar ============ -->
     <aside>
-      <h2>Marker</h2>
+      <h2>Maschinen</h2>
+      <div id="machine-list"></div>
+      <button id="btn-add-machine" class="btn wide">+ Neue Maschine</button>
+      <h2 style="margin-top:14px">Marker</h2>
       <div id="marker-list"></div>
       <div id="add-zone"></div>
       <button id="btn-edit-global" class="btn wide">⚙ Globale Einstellungen</button>
@@ -185,7 +188,27 @@
     <!-- ============ Globale Einstellungen ============ -->
     <section id="global-form" style="display:none">
       <fieldset>
-        <legend>Kamera / Erkennung</legend>
+        <legend>Aktuelle Maschine</legend>
+        <div class="row"><label>Name</label><input id="m-name" type="text" style="width:20em"></div>
+        <div class="row">
+          <label>URL für QR-Code</label>
+          <input id="m-qr-url" type="text" style="width:26em">
+        </div>
+        <div class="row">
+          <label>QR-Zieldatei</label>
+          <span id="m-qr-file" class="static dim" style="font-size:12px;font-weight:400"></span>
+        </div>
+        <div class="btn-row">
+          <button id="btn-qr-regen" class="btn small">QR-Code neu erzeugen &amp; vormerken</button>
+          <button id="btn-del-machine" class="btn small danger">🗑 Maschine löschen</button>
+        </div>
+        <p class="dim small-print">Die AR-Seite zeigt diese Maschine unter <b>?machine=&lt;id&gt;</b> (ohne Parameter die erste
+        Maschine der Liste). Der QR-Code sollte auf genau diese URL zeigen. Barcode-Werte sind pro Maschine unabhängig –
+        Barcode 0 kann bei jeder Maschine anders belegt sein.</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Kamera / Erkennung (alle Maschinen)</legend>
         <div class="row"><label>Kamera-Auflösung (Breite)</label><input id="g-source-w" type="number" step="10" style="width:8em"></div>
         <div class="row"><label>Kamera-Auflösung (Höhe)</label><input id="g-source-h" type="number" step="10" style="width:8em"></div>
         <div class="row"><label>Anzeige-Breite</label><input id="g-display-w" type="number" step="10" style="width:8em"></div>
@@ -215,15 +238,6 @@
         <legend>Overlay-Verhalten</legend>
         <div class="row"><label>Ausblende-Verzögerung (ms)</label><input id="g-hide-delay" type="number" step="100" style="width:8em"></div>
         <div class="row"><label>Ladebildschirm-Dauer (ms)</label><input id="g-loading-ms" type="number" step="500" style="width:8em"></div>
-      </fieldset>
-
-      <fieldset>
-        <legend>QR-Code</legend>
-        <div class="row"><label>URL für QR-Code</label><input id="g-qr-url" type="text" style="width:26em"></div>
-        <div class="btn-row">
-          <button id="btn-qr-regen" class="btn small">QR-Code neu erzeugen &amp; vormerken</button>
-        </div>
-        <p class="dim small-print">Der QR-Code wird beim Speichern als qr/qr-code.png hochgeladen und ersetzt den auf der Desktop-Seite angezeigten Code.</p>
       </fieldset>
 
       <fieldset>

@@ -80,6 +80,21 @@ aside {
 
 aside h2, .preview-wrap h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--dim); margin: 0 0 10px; }
 
+.machine-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 9px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+.machine-item:hover { background: var(--panel2); }
+.machine-item.active { background: var(--panel2); border-color: var(--accent-dim); }
+.machine-label { flex: 1; font-size: 13px; line-height: 1.3; min-width: 0; }
+.machine-label .dim { font-size: 11px; }
+#btn-add-machine { margin-top: 6px; }
+
 .marker-item {
   display: flex;
   align-items: center;
