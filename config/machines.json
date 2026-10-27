@@ -14,7 +14,8 @@
   },
   "machines": [
     {
-      "id": "bohrmaschine"
+      "id": "bohrmaschine",
+      "name": "Bohrmaschine"
     },
     {
       "id": "saege",
