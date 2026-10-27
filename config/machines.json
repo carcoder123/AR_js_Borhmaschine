@@ -24,6 +24,10 @@
     {
       "id": "test",
       "name": "test"
+    },
+    {
+      "id": "laptop",
+      "name": "Laptop"
     }
   ]
 }

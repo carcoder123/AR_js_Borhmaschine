@@ -1,0 +1,64 @@
+{
+  "id": "laptop",
+  "name": "Laptop",
+  "qrUrl": "https://carcoder123.github.io/AR_js_Borhmaschine/?machine=laptop",
+  "qrFile": "qr/laptop.png",
+  "revision": 1,
+  "markers": [
+    {
+      "value": 0,
+      "id": "marker-laptop1",
+      "title": "Laptop1",
+      "color": "#00ff88",
+      "smooth": true,
+      "smoothCount": 3,
+      "frame": {
+        "enabled": true,
+        "opacity": 0.45
+      },
+      "ring": {
+        "enabled": true,
+        "radiusInner": 0.3,
+        "radiusOuter": 0.36,
+        "pulseDur": 900,
+        "pulseScale": 1.15,
+        "opacity": 0.9
+      },
+      "beacon": {
+        "enabled": true,
+        "shape": "octahedron",
+        "radius": 0.12,
+        "height": 0.3,
+        "spinDur": 6000,
+        "bobDur": 1200
+      },
+      "panel": {
+        "enabled": true,
+        "image": "",
+        "width": 0.8,
+        "height": 0.5,
+        "positionY": 0.82,
+        "bgColor": "#1a1a2e",
+        "bgOpacity": 0.92,
+        "titleSize": 1
+      },
+      "model": {
+        "enabled": false,
+        "src": "",
+        "position": [
+          0,
+          0.55,
+          0
+        ],
+        "scale": 0.3,
+        "spinSpeed": 45,
+        "titleHeight": 1.05
+      },
+      "instruction": {
+        "title": "Laptop1",
+        "text": "Das ist meine Laptop?",
+        "steps": []
+      }
+    }
+  ]
+}
