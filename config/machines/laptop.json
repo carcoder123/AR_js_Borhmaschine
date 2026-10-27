@@ -3,7 +3,7 @@
   "name": "Laptop",
   "qrUrl": "https://carcoder123.github.io/AR_js_Borhmaschine/?machine=laptop",
   "qrFile": "qr/laptop.png",
-  "revision": 9,
+  "revision": 10,
   "markers": [
     {
       "value": 0,
@@ -90,7 +90,7 @@
         "bobDur": 1200
       },
       "panel": {
-        "enabled": true,
+        "enabled": false,
         "image": "images/screenshot-2026-10-27-102446.png",
         "width": 8,
         "height": 8,
@@ -100,8 +100,8 @@
         "titleSize": 1
       },
       "model": {
-        "enabled": false,
-        "src": "",
+        "enabled": true,
+        "src": "3d_models/ergoninane-fast-74.glb",
         "position": [
           0,
           0.55,
