@@ -3,7 +3,7 @@
   "name": "Laptop",
   "qrUrl": "https://carcoder123.github.io/AR_js_Borhmaschine/?machine=laptop",
   "qrFile": "qr/laptop.png",
-  "revision": 10,
+  "revision": 11,
   "markers": [
     {
       "value": 0,
@@ -107,7 +107,7 @@
           0.55,
           0
         ],
-        "scale": 0.3,
+        "scale": 1,
         "spinSpeed": 45,
         "titleHeight": 1.05
       },
