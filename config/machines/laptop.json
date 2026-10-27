@@ -3,7 +3,7 @@
   "name": "Laptop",
   "qrUrl": "https://carcoder123.github.io/AR_js_Borhmaschine/?machine=laptop",
   "qrFile": "qr/laptop.png",
-  "revision": 7,
+  "revision": 8,
   "markers": [
     {
       "value": 0,
@@ -92,8 +92,8 @@
       "panel": {
         "enabled": true,
         "image": "images/screenshot-2026-10-27-102446.png",
-        "width": 2,
-        "height": 2,
+        "width": 10,
+        "height": 10,
         "positionY": 0.82,
         "bgColor": "#1a1a2e",
         "bgOpacity": 0.92,
@@ -112,10 +112,10 @@
         "titleHeight": 1.05
       },
       "instruction": {
-        "title": "Laptop2",
+        "title": "Ricardos Laptop",
         "text": "Das ist mein Laptop",
         "steps": [
-          "test"
+          "Hier mit kann ich arbeiten"
         ]
       }
     }
