@@ -92,8 +92,8 @@
       "panel": {
         "enabled": true,
         "image": "images/screenshot-2026-10-27-102446.png",
-        "width": 10,
-        "height": 10,
+        "width": 8,
+        "height": 8,
         "positionY": 0.82,
         "bgColor": "#1a1a2e",
         "bgOpacity": 0.92,
@@ -115,7 +115,7 @@
         "title": "Ricardos Laptop",
         "text": "Das ist mein Laptop",
         "steps": [
-          "Damit mache ich die perfekte Arbeit"
+          "Hier mit kann ich arbeiten"
         ]
       }
     }
