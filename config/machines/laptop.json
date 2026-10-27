@@ -3,12 +3,12 @@
   "name": "Laptop",
   "qrUrl": "https://carcoder123.github.io/AR_js_Borhmaschine/?machine=laptop",
   "qrFile": "qr/laptop.png",
-  "revision": 11,
+  "revision": 1,
   "markers": [
     {
-      "value": 0,
-      "id": "marker-laptop",
-      "title": "Laptop",
+      "value": 3,
+      "id": "marker-laptop-ricardo",
+      "title": "Laptop Ricardo",
       "color": "#00ff88",
       "smooth": true,
       "smoothCount": 3,
@@ -34,9 +34,9 @@
       },
       "panel": {
         "enabled": true,
-        "image": "",
-        "width": 0.8,
-        "height": 0.5,
+        "image": "images/screenshot-2026-10-27-102446.png",
+        "width": 5,
+        "height": 5,
         "positionY": 0.82,
         "bgColor": "#1a1a2e",
         "bgOpacity": 0.92,
@@ -55,67 +55,10 @@
         "titleHeight": 1.05
       },
       "instruction": {
-        "title": "Laptop",
-        "text": "Das ist meine Laptop",
-        "steps": [
-          "Hier kannst du arbeiten"
-        ]
-      }
-    },
-    {
-      "value": 3,
-      "id": "marker-laptop2",
-      "title": "Laptop2",
-      "color": "#00ff88",
-      "smooth": true,
-      "smoothCount": 3,
-      "frame": {
-        "enabled": true,
-        "opacity": 0.45
-      },
-      "ring": {
-        "enabled": true,
-        "radiusInner": 0.3,
-        "radiusOuter": 0.36,
-        "pulseDur": 900,
-        "pulseScale": 1.15,
-        "opacity": 0.9
-      },
-      "beacon": {
-        "enabled": true,
-        "shape": "octahedron",
-        "radius": 0.12,
-        "height": 0.3,
-        "spinDur": 6000,
-        "bobDur": 1200
-      },
-      "panel": {
-        "enabled": false,
-        "image": "images/screenshot-2026-10-27-102446.png",
-        "width": 8,
-        "height": 8,
-        "positionY": 0.82,
-        "bgColor": "#1a1a2e",
-        "bgOpacity": 0.92,
-        "titleSize": 1
-      },
-      "model": {
-        "enabled": true,
-        "src": "3d_models/ergoninane-fast-74.glb",
-        "position": [
-          0,
-          0.55,
-          0
-        ],
-        "scale": 1,
-        "spinSpeed": 45,
-        "titleHeight": 1.05
-      },
-      "instruction": {
-        "title": "Ricardos Laptop",
+        "title": "Laptop Ricardo",
         "text": "Das ist mein Laptop",
         "steps": [
-          "Hier mit kann ich arbeiten"
+          "Damit kann ich arbeiten!"
         ]
       }
     }
