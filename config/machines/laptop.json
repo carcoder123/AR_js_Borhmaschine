@@ -3,7 +3,7 @@
   "name": "Laptop",
   "qrUrl": "https://carcoder123.github.io/AR_js_Borhmaschine/?machine=laptop",
   "qrFile": "qr/laptop.png",
-  "revision": 2,
+  "revision": 3,
   "markers": [
     {
       "value": 0,
@@ -57,7 +57,9 @@
       "instruction": {
         "title": "Laptop",
         "text": "Das ist meine Laptop",
-        "steps": []
+        "steps": [
+          "Hier kannst du arbeiten"
+        ]
       }
     }
   ]
